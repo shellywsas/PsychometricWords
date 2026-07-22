@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>פסיכו-ווקאב | למידה חכמה</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;800;900&family=Rubik:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-shadow: #4338ca;
+            --secondary: #ec4899;
+            --secondary-shadow: #be185d;
+            --success: #22c55e;
+            --success-shadow: #15803d;
+            --danger: #ef4444;
+            --danger-shadow: #b91c1c;
+            --bg-color: #f8fafc;
+        }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 30px 30px;
+            color: #1e293b;
+            overflow: hidden; 
+            touch-action: pan-y;
+        }
+        
+        h1, h2, h3, h4, .rubik-font { font-family: 'Rubik', sans-serif; }
+
+        /* Custom Scrollbar for Desktop (makes it look good on PC) */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .hide-scrollbar-mobile::-webkit-scrollbar { display: none; }
+        @media (min-width: 768px) {
+            .hide-scrollbar-mobile::-webkit-scrollbar { display: block; }
+        }
+
+        .btn-3d {
+            position: relative; border-radius: 1rem; font-weight: 700;
+            transition: all 0.1s; text-align: center; cursor: pointer;
+            user-select: none; display: inline-flex; align-items: center; justify-content: center;
+        }
+        .btn-3d:active, .btn-3d.active-press { transform: translateY(4px); }
+
+        .btn-primary { background-color: var(--primary); color: white; box-shadow: 0 4px 0 var(--primary-shadow); }
+        .btn-primary:active, .btn-primary.active-press { box-shadow: 0 0px 0 var(--primary-shadow); }
+        .btn-success { background-color: var(--success); color: white; box-shadow: 0 4px 0 var(--success-shadow); }
+        .btn-success:active, .btn-success.active-press { box-shadow: 0 0px 0 var(--success-shadow); }
+        .btn-danger { background-color: var(--danger); color: white; box-shadow: 0 4px 0 var(--danger-shadow); }
+        .btn-danger:active, .btn-danger.active-press { box-shadow: 0 0px 0 var(--danger-shadow); }
+        .btn-white { background-color: white; color: #334155; border: 2px solid #e2e8f0; box-shadow: 0 4px 0 #e2e8f0; }
+        .btn-white:active, .btn-white.active-press { box-shadow: 0 0px 0 #e2e8f0; border-color: #e2e8f0; }
+
+        .perspective-1000 { perspective: 1000px; }
+        .flashcard-container { width: 100%; max-width: 450px; margin: 0 auto; height: 100%; min-height: 350px;}
+        .flashcard { width: 100%; height: 100%; position: relative; transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1); transform-style: preserve-3d; cursor: pointer; }
+        .flashcard.flipped { transform: rotateY(180deg); }
+        .flashcard-face {
+            position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
+            border-radius: 1.5rem; padding: 1.5rem; display: flex; flex-direction: column; border: 2px solid #e2e8f0;
+        }
+        .flashcard-front { background: linear-gradient(145deg, #6366f1 0%, #a855f7 100%); color: white; align-items: center; justify-content: center; border: none; box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.4); }
+        .flashcard-back { background-color: white; transform: rotateY(180deg); overflow-y: auto; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
+
+        #game-area { background: linear-gradient(to bottom, #0f172a, #1e293b); border-radius: 1.5rem; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); overflow: hidden; }
+        .falling-word {
+            position: absolute; left: 50%; transform: translateX(-50%); background: rgba(255, 255, 255, 0.95);
+            padding: 0.5rem 1.5rem; border-radius: 999px; font-weight: 800; font-size: 1.25rem; color: #1e293b;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); white-space: nowrap; z-index: 10;
+        }
+        .particle { position: absolute; pointer-events: none; border-radius: 50%; animation: explode 0.5s ease-out forwards; }
+        @keyframes explode { 0% { transform: scale(1); opacity: 1; } 100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; } }
+        
+        .match-card {
+            aspect-ratio: 3/2; display: flex; align-items: center; justify-content: center; background-color: white;
+            border: 2px solid #e2e8f0; border-bottom-width: 4px; border-radius: 1rem; cursor: pointer;
+            font-weight: 700; font-size: 1.1rem; transition: all 0.15s; text-align: center; padding: 0.5rem;
+        }
+        .match-card:hover { border-color: #a855f7; transform: translateY(-2px); }
+        .match-card.selected { background-color: #f3e8ff; border-color: #9333ea; transform: scale(1.05); }
+        .match-card.matched { background-color: #dcfce7; border-color: #22c55e; color: #15803d; pointer-events: none; opacity: 0.5; }
+        .match-card.error { background-color: #fee2e2; border-color: #ef4444; color: #b91c1c; animation: shake 0.4s; }
+
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-5px); } }
+        
+        .tab-content { display: none; opacity: 0; transition: opacity 0.3s; }
+        .tab-content.active { display: flex; flex-direction: column; opacity: 1; animation: slideUp 0.4s ease forwards; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .animate-fade-in { animation: fadeIn 0.2s ease forwards; }
+
+        select {
+            appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%234F46E5%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat; background-position: left 0.7rem top 50%; background-size: 0.65rem auto;
+        }
+    </style>
+</head>
+
+<body class="h-[100dvh] flex flex-col relative text-slate-800">
+
+    <header class="bg-white/90 backdrop-blur-md shadow-sm z-50 border-b border-gray-200 flex-none">
+        <div class="max-w-5xl mx-auto px-4 py-2 flex justify-between items-center gap-3">
+            <div class="flex items-center gap-3 text-indigo-600">
+                <div class="w-9 h-9 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center text-white shadow-md transform -rotate-6">
+                    <i class="fa-solid fa-graduation-cap text-lg"></i>
+                </div>
+                <h1 class="text-xl md:text-2xl font-black tracking-tight rubik-font">פסיכו<span class="text-purple-600">ווקאב</span></h1>
+            </div>
+            
+            <div class="relative w-40 md:w-48">
+                <select id="set-selector" onchange="changeSet(this.value)" class="w-full bg-indigo-50 border-2 border-indigo-100 text-indigo-800 font-bold rounded-xl py-1.5 pl-8 pr-3 outline-none focus:border-indigo-400 cursor-pointer text-sm">
+                    <!-- Sets injected by JS -->
+                </select>
+            </div>
+        </div>
+
+        <nav class="max-w-5xl mx-auto px-2 flex overflow-x-auto border-t border-gray-100 hide-scrollbar-mobile">
+            <button onclick="switchTab('learn')" id="tab-btn-learn" class="tab-btn whitespace-nowrap py-2.5 px-3 md:px-4 font-bold text-indigo-600 border-b-4 border-indigo-600 flex items-center gap-2 transition-colors text-sm md:text-base">
+                <i class="fa-solid fa-cards-blank"></i> כרטיסיות
+            </button>
+            <button onclick="switchTab('story')" id="tab-btn-story" class="tab-btn whitespace-nowrap py-2.5 px-3 md:px-4 font-bold text-gray-400 hover:text-indigo-500 border-b-4 border-transparent transition-colors flex items-center gap-2 text-sm md:text-base">
+                <i class="fa-solid fa-book-open"></i> סיפור הקשר
+            </button>
+            <button onclick="switchTab('drop')" id="tab-btn-drop" class="tab-btn whitespace-nowrap py-2.5 px-3 md:px-4 font-bold text-gray-400 hover:text-indigo-500 border-b-4 border-transparent transition-colors flex items-center gap-2 text-sm md:text-base">
+                <i class="fa-solid fa-meteor"></i> מילים נופלות
+            </button>
+            <button onclick="switchTab('match')" id="tab-btn-match" class="tab-btn whitespace-nowrap py-2.5 px-3 md:px-4 font-bold text-gray-400 hover:text-indigo-500 border-b-4 border-transparent transition-colors flex items-center gap-2 text-sm md:text-base">
+                <i class="fa-solid fa-puzzle-piece"></i> זוגות
+            </button>
+            <button onclick="switchTab('quiz')" id="tab-btn-quiz" class="tab-btn whitespace-nowrap py-2.5 px-3 md:px-4 font-bold text-gray-400 hover:text-indigo-500 border-b-4 border-transparent transition-colors flex items-center gap-2 text-sm md:text-base">
+                <i class="fa-solid fa-list-check"></i> בוחן פתע
+            </button>
+        </nav>
+    </header>
+
+    <main class="flex-1 w-full max-w-5xl mx-auto px-4 py-4 overflow-hidden relative">
+
+        <section id="tab-learn" class="tab-content active h-full justify-between pb-4">
+            <div class="text-center mb-4 flex-none">
+                <h2 class="text-2xl font-black text-slate-800 mb-1 rubik-font">זמן ללמוד! 🧠</h2>
+                <p class="text-slate-500 text-sm">לחצו על הכרטיסייה לתרגום ודוגמאות.</p>
+            </div>
+
+            <div class="flex-1 min-h-0 flex flex-col w-full max-w-md mx-auto">
+                <div class="flex justify-between items-center mb-4 flex-none px-4">
+                    <button onclick="prevCard()" class="btn-3d btn-white w-10 h-10 rounded-full text-indigo-600">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                    <span id="card-counter" class="font-bold text-slate-500 bg-white px-4 py-1 rounded-full shadow-sm border border-slate-100 text-sm">1 / 7</span>
+                    <button onclick="nextCard()" class="btn-3d btn-white w-10 h-10 rounded-full text-indigo-600">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                </div>
+
+                <div class="flashcard-container perspective-1000 flex-1">
+                    <div id="flashcard" class="flashcard" onclick="toggleCard()">
+                        <!-- Front -->
+                        <div class="flashcard-face flashcard-front">
+                            <span id="fc-category" class="text-xs font-bold uppercase tracking-widest text-indigo-200 mb-4 bg-black/20 px-3 py-1 rounded-full"></span>
+                            <h3 id="fc-word" class="text-4xl md:text-5xl font-black mb-8 text-center rubik-font drop-shadow-md"></h3>
+                            <div class="mt-auto flex items-center gap-2 text-indigo-100 bg-white/10 px-4 py-2 rounded-full text-sm font-medium">
+                                <i class="fa-solid fa-rotate"></i> לחצו כדי להפוך
+                            </div>
+                        </div>
+                        
+                        <!-- Back -->
+                        <div class="flashcard-face flashcard-back text-right">
+                            <h3 id="fc-translation" class="text-2xl font-black text-indigo-600 border-b-2 border-indigo-100 pb-2 mb-3 rubik-font"></h3>
+                            
+                            <div class="space-y-4 text-slate-700">
+                                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                    <strong class="text-slate-800 flex items-center gap-2 mb-1 text-sm font-bold"><i class="fa-solid fa-quote-right text-indigo-400"></i> משפט לדוגמה:</strong>
+                                    <p id="fc-example" class="text-base"></p>
+                                </div>
+                                
+                                <div>
+                                    <strong class="text-slate-800 flex items-center gap-2 mb-1 text-sm font-bold"><i class="fa-solid fa-earth-americas text-emerald-500"></i> בעולם האמיתי:</strong>
+                                    <p id="fc-reallife" class="text-sm leading-relaxed"></p>
+                                </div>
+
+                                <div id="fc-analogy-container" class="hidden pb-2">
+                                    <div class="bg-orange-50 border border-orange-200 rounded-xl p-3 mt-1">
+                                        <strong class="text-orange-800 flex items-center gap-2 mb-2 text-sm font-bold"><i class="fa-solid fa-scale-balanced"></i> באנלוגיה (כמו בבחינה):</strong>
+                                        <div class="bg-white p-2 rounded-lg border border-orange-100 shadow-sm">
+                                            <div id="fc-analogy-question" class="font-bold text-base mb-2 text-center"></div>
+                                            <div id="fc-analogy-options" class="grid grid-cols-2 gap-2 text-xs mb-2"></div>
+                                            <div class="text-xs bg-orange-100 text-orange-800 p-2 rounded font-medium" id="fc-analogy-explanation"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="card-indicators" class="flex justify-center gap-2 mt-4 flex-none"></div>
+            </div>
+        </section>
+
+        <section id="tab-story" class="tab-content h-full overflow-y-auto pb-10">
+            <div class="max-w-3xl mx-auto bg-white rounded-3xl shadow-sm border-2 border-slate-100 p-5 md:p-8 relative overflow-hidden mt-2">
+                <div class="absolute -top-10 -right-10 text-8xl text-yellow-50 opacity-50"><i class="fa-solid fa-book"></i></div>
+                
+                <div class="flex items-center gap-3 mb-6 relative z-10">
+                    <div class="w-12 h-12 rounded-2xl bg-yellow-100 flex items-center justify-center text-yellow-500 text-xl shadow-inner flex-none">
+                        <i class="fa-solid fa-lightbulb"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-black text-slate-800 rubik-font">סיפור בהקשר</h2>
+                        <p class="text-slate-500 text-sm font-medium"><span class="bg-yellow-100 text-yellow-800 px-1 rounded">לחצו על המילים בצהוב</span> כדי לראות תרגום.</p>
+                    </div>
+                </div>
+
+                <div class="prose prose-base rtl:prose-reverse max-w-none text-slate-700 leading-loose font-serif relative z-10" id="story-container">
+                    <!-- Story injected by JS -->
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-drop" class="tab-content h-full">
+            <div class="max-w-2xl mx-auto w-full flex flex-col h-full">
+                <div class="flex justify-between items-end mb-3 flex-none">
+                    <div class="text-right flex flex-col">
+                        <h2 class="text-2xl font-black text-slate-800 mb-0.5 rubik-font">מילים נופלות</h2>
+                        <p class="text-slate-500 text-xs font-medium">ירו בתרגום לפני שהמילה נופלת!</p>
+                        <button onclick="restartDropGame()" class="text-xs text-slate-500 hover:text-indigo-600 font-bold self-start mt-1 bg-slate-100 px-2 py-1 rounded transition-colors"><i class="fa-solid fa-rotate-right"></i> התחל מחדש</button>
+                    </div>
+                    <div class="flex gap-2">
+                        <div class="bg-white border-2 border-slate-200 rounded-lg px-3 py-1 text-center">
+                            <div class="text-[10px] text-slate-400 font-bold uppercase">ניקוד</div>
+                            <div class="text-lg font-black text-indigo-600 leading-none" id="drop-score">0</div>
+                        </div>
+                        <div class="bg-white border-2 border-slate-200 rounded-lg px-3 py-1 text-center">
+                            <div class="text-[10px] text-slate-400 font-bold uppercase">חיים</div>
+                            <div class="text-sm text-red-500 flex gap-0.5 justify-center mt-0.5" id="drop-lives">
+                                <i class="fa-solid fa-heart"></i><i class="fa-solid fa-heart"></i><i class="fa-solid fa-heart"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="game-area" class="flex-1 w-full relative mb-3 min-h-[200px]">
+                    <div id="drop-start-screen" class="text-center z-20 absolute inset-0 bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center">
+                        <i class="fa-solid fa-meteor text-4xl text-yellow-400 mb-3 animate-bounce"></i>
+                        <h3 class="text-xl font-bold text-white mb-4">מוכנים?</h3>
+                        <button onclick="startDropGame()" class="btn-3d btn-primary px-6 py-2 text-lg">שחק <i class="fa-solid fa-play mr-2"></i></button>
+                    </div>
+                    <div id="drop-game-container" class="absolute inset-0 hidden"></div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 flex-none pb-4" id="drop-options">
+                    <button class="btn-3d btn-white py-3 text-sm md:text-base opacity-50 cursor-not-allowed">אופציה 1</button>
+                    <button class="btn-3d btn-white py-3 text-sm md:text-base opacity-50 cursor-not-allowed">אופציה 2</button>
+                    <button class="btn-3d btn-white py-3 text-sm md:text-base opacity-50 cursor-not-allowed">אופציה 3</button>
+                    <button class="btn-3d btn-white py-3 text-sm md:text-base opacity-50 cursor-not-allowed">אופציה 4</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-match" class="tab-content h-full overflow-y-auto pb-10">
+            <div class="max-w-3xl mx-auto w-full px-2">
+                <div class="flex justify-between items-center mb-6 mt-2">
+                    <div class="text-right">
+                        <h2 class="text-2xl font-black text-slate-800 mb-1 rubik-font">משחק זוגות</h2>
+                        <p class="text-slate-500 text-sm">התאימו כל מילה לפירוש שלה.</p>
+                    </div>
+                    <div class="flex flex-col items-end gap-1">
+                        <div class="font-mono text-xl font-bold text-indigo-600 bg-indigo-50 border-2 border-indigo-200 inline-block px-4 py-1 rounded-lg shadow-sm" id="match-timer">00:00</div>
+                        <button onclick="restartMatchGame()" class="text-xs text-slate-500 hover:text-indigo-600 font-bold bg-slate-100 px-2 py-1 rounded transition-colors"><i class="fa-solid fa-rotate-right"></i> התחל מחדש</button>
+                    </div>
+                </div>
+
+                <div class="flex justify-center mb-6" id="match-start-container">
+                    <button onclick="startMatchGame()" class="btn-3d btn-primary px-6 py-2 text-lg">
+                        <i class="fa-solid fa-play ml-2"></i> התחל משחק
+                    </button>
+                </div>
+
+                <div id="match-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 opacity-50 pointer-events-none transition-opacity duration-300">
+                    <!-- Cards injected by JS -->
+                </div>
+            </div>
+            
+            <!-- Match Game Win Modal -->
+            <div id="match-win-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center">
+                <div class="bg-white rounded-3xl p-8 max-w-xs w-full text-center mx-4 shadow-2xl border-4 border-emerald-400">
+                    <div class="text-5xl text-emerald-500 mb-3 animate-bounce"><i class="fa-solid fa-medal"></i></div>
+                    <h3 class="text-2xl font-black text-slate-800 mb-2 rubik-font">כל הכבוד!</h3>
+                    <p class="text-slate-600 mb-4 text-sm">זמן סיום: <br><span id="final-time" class="font-black text-xl text-indigo-600"></span></p>
+                    
+                    <div class="flex flex-col gap-3">
+                        <button onclick="restartMatchGame()" class="btn-3d btn-primary w-full py-3 text-base"><i class="fa-solid fa-rotate-right mr-2"></i> שחק שוב</button>
+                        <button onclick="closeMatchModal()" class="btn-3d btn-success w-full py-3 text-base">לבוחן <i class="fa-solid fa-arrow-left mr-2"></i></button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-quiz" class="tab-content h-full overflow-y-auto pb-10">
+            <div class="max-w-xl mx-auto w-full mt-2">
+                <div class="text-center mb-4">
+                    <h2 class="text-2xl font-black text-slate-800 mb-1 rubik-font">בוחן פתע! 📝</h2>
+                    <p class="text-slate-500 text-sm">בואו נראה מה באמת נכנס לראש.</p>
+                </div>
+
+                <div id="quiz-container" class="bg-white rounded-3xl shadow-sm border-2 border-slate-100 p-5 relative overflow-hidden">
+                    <div class="w-full bg-slate-100 rounded-full h-2 mb-6 border border-slate-200">
+                        <div id="quiz-progress" class="bg-gradient-to-r from-indigo-500 to-purple-500 h-full rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
+                    </div>
+                    
+                    <div id="quiz-content">
+                        <div class="flex justify-between items-center mb-4">
+                            <span id="quiz-counter" class="text-xs font-bold text-indigo-500 bg-indigo-50 px-2 py-1 rounded-md">שאלה 1 מתוך 7</span>
+                            <button onclick="resetQuiz()" class="text-xs text-slate-500 hover:text-indigo-600 font-bold bg-slate-50 px-2 py-1 rounded transition-colors"><i class="fa-solid fa-rotate-right"></i> התחל מחדש</button>
+                        </div>
+                        <h3 id="quiz-question" class="text-2xl font-black text-slate-800 mb-6 text-center leading-tight rubik-font"></h3>
+                        
+                        <div id="quiz-options" class="space-y-3">
+                            <!-- Options injected by JS -->
+                        </div>
+                    </div>
+
+                    <div id="quiz-results" class="hidden text-center py-4">
+                        <div class="text-6xl mb-4" id="quiz-emoji">🎉</div>
+                        <h3 class="text-3xl font-black text-slate-800 mb-2 rubik-font">הציון שלך</h3>
+                        <div class="text-4xl font-black text-indigo-600 mb-2" id="quiz-score"></div>
+                        <p class="text-slate-600 mb-6 text-sm font-medium" id="quiz-feedback"></p>
+                        <div class="flex flex-col gap-3 justify-center">
+                            <button onclick="nextSetOrFinish()" class="btn-3d btn-success px-5 py-3">למקבץ הבא <i class="fa-solid fa-arrow-left mr-2"></i></button>
+                            <button onclick="resetQuiz()" class="btn-3d btn-white px-5 py-3 text-sm"><i class="fa-solid fa-rotate-right ml-2"></i> נסה שוב</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        const vocabSets = [
+            {
+                id: 1, name: "מקבץ 1: יריית פתיחה",
+                storyHTML: `ביום ראשון בבוקר, הבוס ה<span class="word-highlight" data-translation="רוטן, מתלונן תמיד">נרגן</span> שלי התחיל בעוד <span class="word-highlight" data-translation="דיבור סרק, קשקוש">להג</span> חסר משמעות על המצב במשרד. 
+                <br><br>הוא טען שהטעויות שלנו הפכו להיות <span class="word-highlight" dir="ltr" data-translation="נמצא בכל מקום">Ubiquitous</span> במחלקה, ושיש <span class="word-highlight" data-translation="הסלמה, החרפה">אסקלציה</span> מסוכנת בחוסר האחריות. 
+                <br><br>הוא דרש להיות יותר <span class="word-highlight" dir="ltr" data-translation="קפדני, דייקן">Meticulous</span>, כדי ל- <span class="word-highlight" dir="ltr" data-translation="להשמיד, למגר">Eradicate</span> את התקלות. למרות זאת, הצוות מאוד <span class="word-highlight" dir="ltr" data-translation="חסין, מתאושש מהר">Resilient</span> ומיד חזרנו לצחוק.`,
+                words: [
+                    { word: "Ubiquitous", translation: "נמצא בכל מקום", category: "אנגלית", example: "Smartphones have become ubiquitous.", realLife: "פקקים בישראל בבוקר - Ubiquitous.", options: ["נדיר", "נמצא בכל מקום", "חמקמק", "עתיק"] },
+                    { word: "Eradicate", translation: "להשמיד, למגר", category: "אנגלית", example: "The goal is to eradicate poverty.", realLife: "חיסונים נועדו ל-Eradicate מחלות.", options: ["לבנות", "לעודד", "להשמיד, למגר", "להעתיק"] },
+                    { word: "Meticulous", translation: "קפדני, דייקן", category: "אנגלית", example: "He is meticulous about his appearance.", realLife: "רואה חשבון שבודק קבלות פעמיים.", options: ["רשלן", "מהיר", "קפדני, דייקן", "שמח"] },
+                    { word: "Resilient", translation: "חסין, מתאושש מהר", category: "אנגלית", example: "Children are often resilient.", realLife: "אדם שקם על הרגליים אחרי משבר.", options: ["שביר", "חסין, מתאושש מהר", "כועס", "עייף"] },
+                    { word: "אֶסְקַלַצְיָה", translation: "הסלמה, החרפה", category: "עברית", example: "חלה אסקלציה ביחסים.", realLife: "כשויכוח קטן הופך לאלימות.", options: ["הסלמה, החרפה", "רגיעה", "התנצלות", "הסכם"], analogy: { question: "אסקלציה : התמתנות", options: ["1. הידברות : שיחה", "2. התקררות : התחממות", "3. ריצה : תחרות", "4. כעס : זעם"], correct: 1, explanation: "התמתנות היא ההפך מאסקלציה, כשם שהתקררות היא ההפך מהתחממות." } },
+                    { word: "לְהַג", translation: "דיבור סרק, קשקוש", category: "עברית", example: "נאומו היה כולו להג.", realLife: "כשמישהו חופר במוח.", options: ["חוכמה", "שתיקה", "דיבור סרק, קשקוש", "שירה"], analogy: { question: "להג : לפטפט", options: ["1. שיר : לזמר", "2. לחש : לצעוק", "3. בכי : לשמוח", "4. מזון : לאכול"], correct: 0, explanation: "להג הוא התוצר של לפטפט, כמו ששיר הוא התוצר של לזמר." } },
+                    { word: "נִרְגָּן", translation: "רוטן, מתלונן תמיד", category: "עברית", example: "הזקן הנרגן העיר לכולם.", realLife: "דרדסבא נרגני!", options: ["שמח", "רוטן, מתלונן תמיד", "נדיב", "אמיץ"], analogy: { question: "נרגן : מתלונן", options: ["1. קמצן : תורם", "2. בדחן : מצחיק", "3. עצלן : עובד", "4. שתקן : מרצה"], correct: 1, explanation: "נרגן הוא אדם שמרבה להתלונן, כשם שבדחן מרבה להצחיק." } }
+                ]
+            },
+            {
+                id: 2, name: "מקבץ 2: ביער הלילי",
+                storyHTML: `החלטתי להפסיק ל- <span class="word-highlight" dir="ltr" data-translation="לדחות, להתמהמה">Procrastinate</span> ויצאתי אל היער בלילה. היה חושך מוחלט עד שהדלקתי <span class="word-highlight" data-translation="לפיד, משואה">אבוקה</span>.
+                <br><br>פתאום שמעתי <span class="word-highlight" data-translation="רעש, המולה">שאון</span> מאחורי השיחים. יצא משם איש, נראה עשיר אבל <span class="word-highlight" data-translation="קמצן, צייקן">כילי</span> להחריד.
+                <br><br>למרות הכל, הוא התגלה כאדם <span class="word-highlight" dir="ltr" data-translation="נדיב, טוב לב">Benevolent</span>. הבנתי שהפחד שלי היה <span class="word-highlight" dir="ltr" data-translation="עודף, מיותר">Superfluous</span> והאירוע המלחיץ היה <span class="word-highlight" dir="ltr" data-translation="חולף, זמני">Ephemeral</span> לחלוטין.`,
+                words: [
+                    { word: "Procrastinate", translation: "לדחות, להתמהמה", category: "אנגלית", example: "Stop procrastinating and work.", realLife: "מה שעושים לפני מבחן (לנקות את הבית במקום ללמוד).", options: ["לזרז", "לדחות, להתמהמה", "לשבח", "לסרב"] },
+                    { word: "Ephemeral", translation: "חולף, זמני", category: "אנגלית", example: "Fame is ephemeral.", realLife: "סטורי באינסטגרם נעלם אחרי 24 שעות.", options: ["נצחי", "מכאיב", "חולף, זמני", "זוהר"] },
+                    { word: "Benevolent", translation: "נדיב, טוב לב", category: "אנגלית", example: "A benevolent donor.", realLife: "הדודה שמביאה מתנות שוות.", options: ["אכזרי", "עני", "נדיב, טוב לב", "כעסן"] },
+                    { word: "Superfluous", translation: "עודף, מיותר", category: "אנגלית", example: "Extra packaging is superfluous.", realLife: "חגורה וגם שלייקס.", options: ["הכרחי", "מרתק", "נוזלי", "עודף, מיותר"] },
+                    { word: "כִּילַי", translation: "קמצן, צייקן", category: "עברית", example: "העשיר הכילי סירב לתרום.", realLife: "מר קראב מבובספוג.", options: ["נדיב", "קמצן, צייקן", "לוחם", "חכם"], analogy: { question: "כילי : לתת", options: ["1. שתקן : לדבר", "2. רעב : לאכול", "3. עייף : לישון", "4. שקרן : לרמות"], correct: 0, explanation: "כילי נמנע מלתת, כשם ששתקן נמנע מלדבר." } },
+                    { word: "שָׁאוֹן", translation: "רעש, המולה", category: "עברית", example: "שאון המכוניות בעיר.", realLife: "הפסקה בבית ספר יסודי.", options: ["שקט", "רעש, המולה", "שעון", "חושך"], analogy: { question: "שאון : דממה", options: ["1. אור : חושך", "2. צבע : מכחול", "3. מים : ים", "4. שמחה : צחוק"], correct: 0, explanation: "שאון הוא ההפך מדממה." } },
+                    { word: "אֲבוּקָה", translation: "לפיד, משואה", category: "עברית", example: "נשאו אבוקות בלילה.", realLife: "בטקסי הדלקת משואות.", options: ["לפיד, משואה", "חרב", "סירה", "ספר"], analogy: { question: "אבוקה : להאיר", options: ["1. עט : לכתוב", "2. חלון : לפתוח", "3. כיסא : לשבת", "4. מזלג : צלחת"], correct: 0, explanation: "תפקיד האבוקה הוא להאיר." } }
+                ]
+            },
+            {
+                id: 3, name: "מקבץ 3: תעלומת הבלש",
+                storyHTML: `הבלש עמד מול <span class="word-highlight" dir="ltr" data-translation="תעלומה, חידה">Enigma</span> שלא נראתה כמותה. כדי ל- <span class="word-highlight" dir="ltr" data-translation="להקל, לשכך">Mitigate</span> את הלחץ, הוא החליט לנקוט בגישה <span class="word-highlight" dir="ltr" data-translation="מעשית">Pragmatic</span>.
+                <br><br>השומר בבניין היה אדם <span class="word-highlight" data-translation="חלש, מפגר מאחור">נחשל</span> שנראה <span class="word-highlight" dir="ltr" data-translation="ישנוני, עייף">Lethargic</span> למדי. לפתע הבלש מצא <span class="word-highlight" data-translation="כפפה">כסיה</span> קרועה ו-<span class="word-highlight" data-translation="צמיד">אצעדה</span> נוצצת, והכל התחבר.`,
+                words: [
+                    { word: "Enigma", translation: "תעלומה, חידה", category: "אנגלית", example: "His disappearance remains an enigma.", realLife: "חידת סודוקו בלתי פתירה.", options: ["תעלומה, חידה", "פיתרון", "ספר", "מסע"] },
+                    { word: "Mitigate", translation: "להקל, לשכך", category: "אנגלית", example: "Medicine will mitigate the pain.", realLife: "אקמול כדי להעביר כאב ראש.", options: ["להחמיר", "להקל, לשכך", "להתעלם", "לצעוק"] },
+                    { word: "Pragmatic", translation: "מעשי, תכליתי", category: "אנגלית", example: "He took a pragmatic approach to the problem.", realLife: "לקנות רכב חסכוני במקום רכב ספורט נוצץ.", options: ["חלמני", "רגשי", "מעשי, תכליתי", "כועס"] },
+                    { word: "Lethargic", translation: "ישנוני, עייף", category: "אנגלית", example: "I felt lethargic after eating too much.", realLife: "תחושת הכבדות אחרי ארוחת חג.", options: ["נמרץ", "ישנוני, עייף", "חכם", "מהיר"] },
+                    { word: "נֶחְשָׁל", translation: "מפגר מאחור, חלש", category: "עברית", example: "מדינת עולם שלישי נחשבת למדינה נחשלת.", realLife: "מישהו שנשאר מאחור בטיול השנתי.", options: ["מוביל", "מפגר מאחור, חלש", "חכם", "עקשן"], analogy: { question: "נחשל : חלוץ", options: ["1. עני : אביון", "2. טיפש : חכם", "3. איטי : זוחל", "4. מהיר : אצן"], correct: 1, explanation: "נחשל הוא ההפך מחלוץ (מי שמוביל קדימה), כשם שטיפש הוא ההפך מחכם." } },
+                    { word: "כְּסָיָה", translation: "כפפה", category: "עברית", example: "בחורף היא נוהגת ללבוש כסיות מול כותנה.", realLife: "כפפות ששמים בשלג.", options: ["כובע", "גרביים", "מעיל", "כפפה"], analogy: { question: "כסיה : כף יד", options: ["1. צעיף : צוואר", "2. משקפיים : עין", "3. חגורה : בטן", "4. נעל : ראש"], correct: 0, explanation: "כסיה נועדה לעטוף את כף היד, כשם שצעיף נועד לעטוף את הצוואר." } },
+                    { word: "אֶצְעָדָה", translation: "צמיד", category: "עברית", example: "היא ענדה אצעדה מזהב על ידה.", realLife: "תכשיט פנדורה על היד.", options: ["שרשרת", "טבעת", "עגיל", "צמיד"], analogy: { question: "אצעדה : זרוע", options: ["1. טבעת : אצבע", "2. כתר : רגל", "3. כובע : פנים", "4. חולצה : כתף"], correct: 0, explanation: "אצעדה (צמיד) עונדים על הזרוע, כשם שטבעת עונדים על האצבע." } }
+                ]
+            },
+            {
+                id: 4, name: "מקבץ 4: תלמיד מצטיין",
+                storyHTML: `התלמיד ה-<span class="word-highlight" dir="ltr" data-translation="חרוץ, שקדן">Diligent</span> היה ידוע גם כבחור <span class="word-highlight" dir="ltr" data-translation="חסכן">Frugal</span> שלא מבזבז סתם. הוא דיבר באופן <span class="word-highlight" dir="ltr" data-translation="רהוט">Eloquent</span> ו-<span class="word-highlight" dir="ltr" data-translation="כנה, ישיר">Candid</span>.
+                <br><br>יום אחד לקח <span class="word-highlight" data-translation="עט, מכשיר כתיבה">קולמוס</span> והחל לכתוב את כל ה<span class="word-highlight" data-translation="סודות, אוצרות">מכמנים</span> של הכיתה. השאר הגיבו ב<span class="word-highlight" data-translation="גועל, בוז">שאט נפש</span> ליצירה שלו.`,
+                words: [
+                    { word: "Diligent", translation: "חרוץ, שקדן", category: "אנגלית", example: "A diligent student gets good grades.", realLife: "הילד שיושב בשורה הראשונה וכותב הכל.", options: ["עצלן", "חרוץ, שקדן", "טיפש", "גבוה"] },
+                    { word: "Frugal", translation: "חסכן", category: "אנגלית", example: "She lives a frugal lifestyle to save money.", realLife: "לקנות הכל במבצעים של 1+1.", options: ["בזבזן", "חסכן", "עשיר", "עני"] },
+                    { word: "Eloquent", translation: "רהוט, בעל כושר ביטוי", category: "אנגלית", example: "He gave an eloquent speech.", realLife: "פוליטיקאי שנואם בצורה מרשימה ללא גמגומים.", options: ["מגמגם", "שקט", "רהוט, בעל כושר ביטוי", "צועק"] },
+                    { word: "Candid", translation: "כנה, ישיר", category: "אנגלית", example: "Please be candid with me.", realLife: "חבר שאומר לך בפרצוף שהחולצה לא מתאימה לך.", options: ["שקרן", "כנה, ישיר", "מהסס", "מתנצל"] },
+                    { word: "קֻלְמוֹס", translation: "עט, מכשיר כתיבה", category: "עברית", example: "הסופר טבל את קולמוסו בדיו.", realLife: "עט נובע מפעם או סתם עט פיילוט.", options: ["ספר", "עט, מכשיר כתיבה", "מחק", "דף"], analogy: { question: "קולמוס : דיו", options: ["1. תנור : אש", "2. מכחול : צבע", "3. מחשב : מקלדת", "4. רכב : גלגל"], correct: 1, explanation: "הקולמוס פועל באמצעות הדיו, כשם שהמכחול פועל באמצעות צבע." } },
+                    { word: "מַכְמַנִּים", translation: "סודות, אוצרות", category: "עברית", example: "מכמני השפה העברית עמוקים מאוד.", realLife: "סודות שמורים היטב או אוצר אבוד.", options: ["סודות, אוצרות", "שקרים", "סיפורים", "מכשירים"], analogy: { question: "מכמנים : לגלות", options: ["1. חידה : לפתור", "2. כסף : לבזבז", "3. שיר : לשיר", "4. חלון : לסגור"], correct: 0, explanation: "לגלות זה לחשוף את המכמנים, כשם שלפתור זה לחשוף את החידה." } },
+                    { word: "שְׁאַט נֶפֶשׁ", translation: "גועל, בוז", category: "עברית", example: "הוא התבונן במעשה בשאט נפש.", realLife: "הפרצוף שעושים כשמריחים חלב מקולקל.", options: ["שמחה רבה", "גועל, בוז", "אדישות", "הפתעה"], analogy: { question: "שאט נפש : נגעל", options: ["1. עליצות : שמח", "2. ייאוש : מקווה", "3. פחד : אמיץ", "4. עייפות : נח"], correct: 0, explanation: "שאט נפש היא התחושה של מי שנגעל, כשם שעליצות היא התחושה של מי ששמח." } }
+                ]
+            },
+            {
+                id: 5, name: "מקבץ 5: כלי קציר וניסים",
+                storyHTML: `האיכר ה<span class="word-highlight" dir="ltr" data-translation="לוחמני">Belligerent</span> החזיק <span class="word-highlight" data-translation="כלי קציר">מגל</span> בידו. הציוד שלו היה <span class="word-highlight" dir="ltr" data-translation="מיושן, שעבר זמנו">Obsolete</span> לחלוטין.
+                <br><br>פתאום, בסוג של <span class="word-highlight" dir="ltr" data-translation="תגלית מקרית ומשמחת">Serendipity</span> ועם <span class="word-highlight" dir="ltr" data-translation="הארה">Epiphany</span> מדהימה, הוא גילה שחזר לו ה<span class="word-highlight" data-translation="תרמיל, שק">ציקלון</span> האבוד עם <span class="word-highlight" data-translation="צרור שיבולים, קרן אור">אלומת</span> חיטה מזהב טהור.`,
+                words: [
+                    { word: "Belligerent", translation: "לוחמני, תוקפני", category: "אנגלית", example: "The belligerent man started a fight.", realLife: "אוהד כדורגל שמתחיל קטטה ביציע.", options: ["לוחמני, תוקפני", "רגוע", "עצוב", "חכם"] },
+                    { word: "Obsolete", translation: "מיושן, שעבר זמנו", category: "אנגלית", example: "Typewriters are now obsolete.", realLife: "דיסקמן, קלטות וידאו.", options: ["חדשני", "מיושן, שעבר זמנו", "יקר", "מהיר"] },
+                    { word: "Serendipity", translation: "תגלית מקרית ומשמחת", category: "אנגלית", example: "Finding money in an old coat is pure serendipity.", realLife: "למצוא שטר של 200 שקל בכיס המעיל משנה שעברה.", options: ["אסון", "תגלית מקרית ומשמחת", "עבודה קשה", "שגרה"] },
+                    { word: "Epiphany", translation: "הארה, גילוי", category: "אנגלית", example: "She had an epiphany about her career.", realLife: "הרגע הזה במקלחת שמבינים איך לפתור את הבעיה.", options: ["בלבול", "הארה, גילוי", "חלום רע", "שינה"] },
+                    { word: "מַגָּל", translation: "כלי קציר", category: "עברית", example: "האיכר קצר את החיטה במגל.", realLife: "הסמל הקומוניסטי של הפטיש והמגל.", options: ["פטיש", "כלי קציר", "כלי רכב", "סיר"], analogy: { question: "מגל : קוצר", options: ["1. עט : כותב", "2. סכין : חותך", "3. מספריים : גוזרים", "4. כל התשובות נכונות"], correct: 3, explanation: "מגל הוא כלי שתפקידו לבצע פעולת קציר, בדומה לכל שאר הזוגות בהם יש כלי ופעולתו." } },
+                    { word: "צִיקְלוֹן", translation: "תרמיל, שק", category: "עברית", example: "הנווד לקח את ציקלונו ויצא לדרך.", realLife: "תיק גב של מוצ'ילרים.", options: ["סערה", "תרמיל, שק", "מעיל", "כובע"], analogy: { question: "ציקלון : ציוד", options: ["1. ארנק : כסף", "2. חלון : אוויר", "3. שולחן : עץ", "4. בקבוק : זכוכית"], correct: 0, explanation: "הציקלון (תרמיל) משמש לאחסון ציוד, כשם שהארנק משמש לאחסון כסף." } },
+                    { word: "אֲלוּמָה", translation: "צרור שיבולים, קרן אור", category: "עברית", example: "אלומת אור פילחה את החושך.", realLife: "הפנס של השומר בלילה שזורק קרן אור.", options: ["עץ", "צרור שיבולים, קרן אור", "כלי מים", "סלע"], analogy: { question: "אלומה : שיבולים", options: ["1. זר : פרחים", "2. עדר : זאבים", "3. יער : עצים", "4. כל התשובות נכונות"], correct: 3, explanation: "אלומה היא אוסף של שיבולים, כשם שזר הוא אוסף פרחים, יער של עצים וכו'." } }
+                ]
+            },
+            {
+                id: 6, name: "מקבץ 6: מבצע בחשכה",
+                storyHTML: `במבצע <span class="word-highlight" dir="ltr" data-translation="חשאי">Clandestine</span> בלילה, שרר <span class="word-highlight" data-translation="שקט, דממה">דמי</span> מוחלט. ענן <span class="word-highlight" dir="ltr" data-translation="מבשר רעות">Ominous</span> כיסה את הירח. 
+                <br><br>מראה <span class="word-highlight" dir="ltr" data-translation="שמימי, רוחני">Ethereal</span> הופיע, וזו הייתה <span class="word-highlight" dir="ltr" data-translation="חריגה, תופעה לא תקינה">Anomaly</span> מוחלטת. מיד החלה <span class="word-highlight" data-translation="הכנה, פעילות רבה">תכונה</span> רבה במחנה, והלוחמים נדרשו לכל <span class="word-highlight" data-translation="תכונה חיובית, יכולת">סגולה</span> אפשרית כדי לשרוד.`,
+                words: [
+                    { word: "Clandestine", translation: "חשאי, סודי", category: "אנגלית", example: "A clandestine meeting of spies.", realLife: "פגישה סודית של המוסד.", options: ["פומבי", "חשאי, סודי", "רועש", "רשמי"] },
+                    { word: "Ominous", translation: "מבשר רעות", category: "אנגלית", example: "Dark ominous clouds gathered.", realLife: "מוזיקת רקע מפחידה בסרט אימה לפני שמשהו קופץ.", options: ["משמח", "מבשר רעות", "מצחיק", "מרגיע"] },
+                    { word: "Ethereal", translation: "שמימי, רוחני", category: "אנגלית", example: "Her voice has an ethereal quality.", realLife: "המראה של הזוהר הצפוני - נראה לא מהעולם הזה.", options: ["ארצי", "שמימי, רוחני", "כבד", "מכוער"] },
+                    { word: "Anomaly", translation: "חריגה, תופעה לא תקינה", category: "אנגלית", example: "Snow in August is an anomaly.", realLife: "לקבל 100 במבחן שלא למדת אליו.", options: ["שגרה", "חריגה, תופעה לא תקינה", "חוק", "ברכה"] },
+                    { word: "דְּמִי", translation: "שקט, דממה", category: "עברית", example: "דמי הלילה הופרע על ידי צווחה.", realLife: "השקט המוחלט בשתיים בלילה.", options: ["שקט, דממה", "כסף", "דם", "רעש"], analogy: { question: "דמי : רעש", options: ["1. אור : חושך", "2. גבוה : נמוך", "3. כל התשובות נכונות", "4. חם : רותח"], correct: 2, explanation: "דמי (שקט) הוא ההפך מרעש, כל הזוגות (חוץ מ-4) הם הפכים." } },
+                    { word: "תְּכוּנָה", translation: "הכנה, פעילות רבה", category: "עברית", example: "תכונה רבה הורגשה לפני בוא הנשיא.", realLife: "הלחץ והריצות במטבח שעה לפני שבת.", options: ["שקט", "הכנה, פעילות רבה", "עצלנות", "שינה"], analogy: { question: "תכונה : שקט", options: ["1. מהומה : דממה", "2. כעס : זעם", "3. יופי : כיעור", "4. לילה : חושך"], correct: 0, explanation: "תכונה (המולה/פעילות) מנוגדת לשקט, כשם שמהומה מנוגדת לדממה." } },
+                    { word: "סְגֻלָּה", translation: "תכונה חיובית, יכולת", category: "עברית", example: "סבלנות היא סגולה חשובה.", realLife: "להיות אדם שיודע להקשיב זו סגולה.", options: ["חיסרון", "תכונה חיובית, יכולת", "צבע", "חולשה"], analogy: { question: "סגולה : פגם", options: ["1. יתרון : חיסרון", "2. טוב : רע", "3. יפה : מכוער", "4. כל התשובות נכונות"], correct: 3, explanation: "סגולה (תכונה טובה) היא ההפך מפגם, כל הזוגות מייצגים הפכים." } }
+                ]
+            },
+            {
+                id: 7, name: "מקבץ 7: מסיבה וקינוחים",
+                storyHTML: `במסיבה ה-<span class="word-highlight" dir="ltr" data-translation="מוארת, זוהרת">Luminous</span> פגשנו אדם <span class="word-highlight" dir="ltr" data-translation="חברותי, נוטה לעדר">Gregarious</span>. קולו היה <span class="word-highlight" dir="ltr" data-translation="מהדהד">Resonant</span> כשהזמין אותנו לאכול <span class="word-highlight" data-translation="קינוחים">פרפראות</span>. 
+                <br><br>הייתה בחדר <span class="word-highlight" data-translation="הפצת ריח">הדפה</span> חזקה של וניל, שהייתה <span class="word-highlight" data-translation="לגמרי, לחלוטין">כליל</span> השלמות. ישבנו ל-<span class="word-highlight" dir="ltr" data-translation="להרהר">Ponder</span> על משמעות החיים.`,
+                words: [
+                    { word: "Luminous", translation: "מואר, זוהר", category: "אנגלית", example: "The luminous moon shone brightly.", realLife: "סטיקלייטים שזוהרים בחושך.", options: ["חשוך", "מואר, זוהר", "עמום", "רועש"] },
+                    { word: "Gregarious", translation: "חברותי, אוהב חברה", category: "אנגלית", example: "Dolphins are gregarious animals.", realLife: "החבר הזה שמכיר את כולם בבר ולוחץ ידיים לכולם.", options: ["מתבודד", "חברותי, אוהב חברה", "כועס", "טיפש"] },
+                    { word: "Resonant", translation: "מהדהד, עמוק", category: "אנגלית", example: "He has a deep, resonant voice.", realLife: "קריין רדיו עם קול באס עמוק.", options: ["מהדהד, עמוק", "צווחני", "חלש", "שקט"] },
+                    { word: "Ponder", translation: "להרהר, לחשוב עמוקות", category: "אנגלית", example: "I need to ponder my decision.", realLife: "לשבת מול הים ולחשוב לאן החיים לוקחים אותנו.", options: ["לרוץ", "להרהר, לחשוב עמוקות", "לצעוק", "להתעלם"] },
+                    { word: "פַּרְפְּרָאוֹת", translation: "קינוחים, דברים קלילים", category: "עברית", example: "אחרי הארוחה הוגשו פרפראות.", realLife: "עוגת שוקולד בסוף ארוחה במסעדה.", options: ["בשרים", "קינוחים, דברים קלילים", "מרקים", "שתייה"], analogy: { question: "פרפראות : סעודה", options: ["1. סוף : התחלה", "2. אפילוג : ספר", "3. כריכה : דף", "4. מנה ראשונה : קינוח"], correct: 1, explanation: "פרפראות באות בסוף הסעודה, כשם שאפילוג בא בסוף הספר." } },
+                    { word: "הֲדָפָה", translation: "הפצת ריח", category: "עברית", example: "הדפת הבושם הורגשה בחדר.", realLife: "כשמישהו שם חצי בקבוק בושם ונכנס למעלית.", options: ["סגירה", "הפצת ריח", "מכה", "ריצה"], analogy: { question: "הדפה : אף", options: ["1. קרינה : אוזן", "2. צבע : עין", "3. קול : שפתיים", "4. טעם : יד"], correct: 1, explanation: "הדפה (ריח) נקלטת בחוש הריח (אף), כשם שצבע נקלט בחוש הראייה (עין)." } },
+                    { word: "כְּלִיל", translation: "לגמרי, לחלוטין", category: "עברית", example: "הוא צדק כליל בהערכתו.", realLife: "כשאומרים 'כליל השלמות' (מושלם לגמרי).", options: ["קצת", "לגמרי, לחלוטין", "כמעט", "בקושי"], analogy: { question: "כליל : מעט", options: ["1. בשפע : קמצוץ", "2. הכל : כמעט", "3. תמיד : לפעמים", "4. כל התשובות נכונות"], correct: 3, explanation: "כליל (לחלוטין/הכל) מנוגד ל'מעט', כל הזוגות מייצגים יחס של המון לעומת קצת." } }
+                ]
+            },
+            {
+                id: 8, name: "מקבץ 8: עורך הדין הפיקח",
+                storyHTML: `עורך הדין ה-<span class="word-highlight" dir="ltr" data-translation="פיקח, נבון">Astute</span> מצא דרך ל-<span class="word-highlight" dir="ltr" data-translation="לזכות, להצדיק">Vindicate</span> את הלקוח שלו. אנשים נטו ל-<span class="word-highlight" dir="ltr" data-translation="ללעוג, לבוז">Deride</span> אותו על שלבש מעיל <span class="word-highlight" data-translation="מנומר, מוכתם">ברוד</span>. 
+                <br><br>הוא <span class="word-highlight" data-translation="הסתיר, שמר בארכיון">גנז</span> את המסמכים החשאיים כדי ל- <span class="word-highlight" dir="ltr" data-translation="להקל">Alleviate</span> על המצב, וזה היה <span class="word-highlight" data-translation="קריטריון למבחן">אבן בוחן</span> לאמינותו.`,
+                words: [
+                    { word: "Astute", translation: "פיקח, נבון", category: "אנגלית", example: "An astute observer noticed the detail.", realLife: "עורך דין שקולט סעיף קטן בחוזה שמשנה הכל.", options: ["טיפש", "פיקח, נבון", "מהיר", "איטי"] },
+                    { word: "Vindicate", translation: "לזכות, להצדיק", category: "אנגלית", example: "New evidence will vindicate him.", realLife: "כשמאשימים אותך בטעות, ואז מוכיחים שצדקת.", options: ["להאשים", "לזכות, להצדיק", "לכלוא", "להעניש"] },
+                    { word: "Deride", translation: "ללעוג, לבוז", category: "אנגלית", example: "Critics deride his new movie.", realLife: "טוקבקיסטים שצוחקים על זמר רשת כושל.", options: ["לשבח", "ללעוג, לבוז", "לעזור", "לחבק"] },
+                    { word: "Alleviate", translation: "להקל, לשכך", category: "אנגלית", example: "Ice will alleviate the swelling.", realLife: "כדור נגד כאבי ראש שמקל על המצב.", options: ["להכביד", "להקל, לשכך", "לרוץ", "לצעוק"] },
+                    { word: "בָּרוּד", translation: "מנומר, בעל כתמים", category: "עברית", example: "הסוס הברוד דהר באחו.", realLife: "פרווה של כלב דלמטי.", options: ["חלק", "מנומר, בעל כתמים", "שחור", "לבן"], analogy: { question: "ברוד : כתם", options: ["1. משובץ : קו", "2. מפוספס : פס", "3. מתולתל : שערה", "4. כל התשובות נכונות"], correct: 3, explanation: "ברוד מאופיין על ידי כתמים, בדומה למפוספס על ידי פסים ומשובץ על ידי קווים." } },
+                    { word: "גָּנַז", translation: "הסתיר, שמר בארכיון", category: "עברית", example: "הוא גנז את הרעיון מחוסר תקציב.", realLife: "פרויקט בעבודה שבוטל ונזרק למגירה.", options: ["פרסם", "הסתיר, שמר בארכיון", "קרא", "כתב"], analogy: { question: "גנז : פרסם", options: ["1. החביא : חשף", "2. שמר : זרק", "3. בכה : צחק", "4. כעס : נרגע"], correct: 0, explanation: "גנז (הסתיר/שמר בסוד) הוא ההפך מפרסם, כשם שהחביא הוא ההפך מחשף." } },
+                    { word: "אֶבֶן בֹּחַן", translation: "קריטריון, אמת מידה", category: "עברית", example: "המבחן הזה מהווה אבן בוחן לידע.", realLife: "מבחן הפסיכומטרי מהווה קריטריון קבלה לאוניברסיטה.", options: ["קריטריון, אמת מידה", "אבן כבדה", "חומת מגן", "כלי נשק"], analogy: { question: "אבן בוחן : להעריך", options: ["1. מאזניים : לשקול", "2. שעון : למדוד", "3. סרגל : לשרטט", "4. כל התשובות נכונות"], correct: 3, explanation: "אבן בוחן משמשת כדי להעריך, כשם שמאזניים משמשים כדי לשקול וסרגל כדי לשרטט." } }
+                ]
+            }
+        ];
+
+        let currentSetIndex = 0;
+        let activeWords = vocabSets[0].words;
+        
+        window.onload = () => {
+            initSetSelector();
+            loadSet(0);
+        };
+
+        function initSetSelector() {
+            const selector = document.getElementById('set-selector');
+            selector.innerHTML = '';
+            vocabSets.forEach((set, index) => {
+                const opt = document.createElement('option');
+                opt.value = index;
+                opt.innerText = set.name;
+                selector.appendChild(opt);
+            });
+        }
+
+        function changeSet(index) {
+            currentSetIndex = parseInt(index);
+            loadSet(currentSetIndex);
+            switchTab('learn');
+            closeMatchModal(); 
+            closeQuizResults();
+        }
+
+        function loadSet(index) {
+            activeWords = vocabSets[index].words;
+            
+            currentCardIndex = 0;
+            updateFlashcard();
+            
+            document.getElementById('story-container').innerHTML = vocabSets[index].storyHTML;
+            attachStoryHighlights();
+            
+            stopDropGame();
+            document.getElementById('drop-start-screen').classList.remove('hidden');
+            document.getElementById('drop-game-container').classList.add('hidden');
+            document.getElementById('drop-options').querySelectorAll('button').forEach(b => {
+                b.classList.add('opacity-50', 'cursor-not-allowed');
+                b.disabled = true;
+            });
+            
+            clearInterval(timerInterval);
+            matchGameActive = false;
+            initMatchGame();
+            
+            // Force quiz to re-initialize next time it's opened
+            document.getElementById('quiz-options').innerHTML = ''; 
+        }
+
+        function switchTab(tabId) {
+            if(tabId !== 'drop' && dropGameActive) stopDropGame();
+            if(tabId !== 'match') clearInterval(timerInterval);
+
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('text-indigo-600', 'border-indigo-600');
+                btn.classList.add('text-gray-400', 'border-transparent');
+            });
+            const activeBtn = document.getElementById(`tab-btn-${tabId}`);
+            activeBtn.classList.remove('text-gray-400', 'border-transparent');
+            activeBtn.classList.add('text-indigo-600', 'border-indigo-600');
+
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+
+            if (tabId === 'quiz' && (document.getElementById('quiz-options').innerHTML === '' || !document.getElementById('quiz-results').classList.contains('hidden'))) {
+                initQuiz();
+            }
+        }
+
+        function attachStoryHighlights() {
+            document.querySelectorAll('.word-highlight').forEach(el => {
+                el.classList.add('bg-yellow-200', 'px-1', 'rounded', 'font-bold', 'text-slate-800', 'cursor-pointer', 'transition-colors', 'hover:bg-yellow-300');
+                el.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    el.classList.add('animate-pulse');
+                    setTimeout(() => el.classList.remove('animate-pulse'), 500);
+                    showTooltip(el);
+                });
+            });
+        }
+
+        function showTooltip(el) {
+            document.querySelectorAll('.story-tooltip').forEach(t => t.remove());
+            const translation = el.dataset.translation;
+            if(!translation) return;
+
+            const tooltip = document.createElement('div');
+            tooltip.className = 'story-tooltip absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-indigo-900 text-white text-xs md:text-sm px-3 py-1.5 rounded-lg shadow-lg whitespace-nowrap z-50 animate-fade-in pointer-events-none after:content-[""] after:absolute after:top-full after:left-1/2 after:-translate-x-1/2 after:border-4 after:border-transparent after:border-t-indigo-900 font-sans';
+            tooltip.innerText = translation;
+
+            el.classList.add('relative');
+            el.appendChild(tooltip);
+
+            setTimeout(() => { if(tooltip.parentNode === el) el.removeChild(tooltip); }, 3000);
+        }
+
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.story-tooltip').forEach(t => t.remove());
+        });
+
+        let currentCardIndex = 0;
+        function updateFlashcard() {
+            const data = activeWords[currentCardIndex];
+            document.getElementById('fc-category').innerText = data.category;
+            
+            const wordEl = document.getElementById('fc-word');
+            wordEl.innerText = data.word;
+            wordEl.dir = data.category === 'אנגלית' ? 'ltr' : 'rtl';
+            
+            document.getElementById('fc-translation').innerText = data.translation;
+            
+            const exEl = document.getElementById('fc-example');
+            exEl.innerText = data.example;
+            exEl.dir = data.category === 'אנגלית' ? 'ltr' : 'rtl';
+            
+            document.getElementById('fc-reallife').innerText = data.realLife;
+
+            const analogyContainer = document.getElementById('fc-analogy-container');
+            if(data.analogy) {
+                analogyContainer.classList.remove('hidden');
+                document.getElementById('fc-analogy-question').innerText = data.analogy.question;
+                
+                const optsContainer = document.getElementById('fc-analogy-options');
+                optsContainer.innerHTML = '';
+                data.analogy.options.forEach((optText, idx) => {
+                    const div = document.createElement('div');
+                    div.className = `p-1.5 rounded font-medium ${idx === data.analogy.correct ? 'bg-orange-200 text-orange-900 border border-orange-300' : 'bg-slate-50 text-slate-500 border border-slate-100'}`;
+                    div.innerText = optText;
+                    optsContainer.appendChild(div);
+                });
+                document.getElementById('fc-analogy-explanation').innerText = data.analogy.explanation;
+            } else {
+                analogyContainer.classList.add('hidden');
+            }
+
+            document.getElementById('card-counter').innerText = `${currentCardIndex + 1} / ${activeWords.length}`;
+            document.getElementById('flashcard').classList.remove('flipped');
+            updateCardIndicators();
+        }
+
+        function toggleCard() { document.getElementById('flashcard').classList.toggle('flipped'); }
+        function nextCard() { currentCardIndex = (currentCardIndex + 1) % activeWords.length; updateFlashcard(); }
+        function prevCard() { currentCardIndex = (currentCardIndex - 1 + activeWords.length) % activeWords.length; updateFlashcard(); }
+
+        function updateCardIndicators() {
+            const container = document.getElementById('card-indicators');
+            container.innerHTML = '';
+            for(let i=0; i < activeWords.length; i++) {
+                const dot = document.createElement('div');
+                dot.className = `w-2 h-2 rounded-full transition-all cursor-pointer ${i === currentCardIndex ? 'bg-indigo-600 scale-125' : 'bg-slate-300 hover:bg-slate-400'}`;
+                dot.onclick = () => { currentCardIndex = i; updateFlashcard(); };
+                container.appendChild(dot);
+            }
+        }
+
+        let dropGameActive = false;
+        let dropScore = 0;
+        let dropLives = 3;
+        let fallingElement = null;
+        let currentTargetWord = null;
+        let fallAnimationId;
+        let yPos = -50;
+        let fallSpeed = 1.0;
+
+        function startDropGame() {
+            stopDropGame(); // clear previous state if any
+            dropGameActive = true;
+            dropScore = 0;
+            dropLives = 3;
+            fallSpeed = 0.8;
+            updateDropUI();
+            
+            document.getElementById('drop-start-screen').classList.add('hidden');
+            document.getElementById('drop-game-container').classList.remove('hidden');
+            
+            document.getElementById('drop-options').querySelectorAll('button').forEach(b => {
+                b.classList.remove('opacity-50', 'cursor-not-allowed');
+                b.disabled = false;
+            });
+
+            spawnWord();
+        }
+
+        function restartDropGame() {
+            if(dropGameActive || document.getElementById('drop-game-container').classList.contains('hidden') === false) {
+                startDropGame();
+            }
+        }
+
+        function stopDropGame() {
+            dropGameActive = false;
+            cancelAnimationFrame(fallAnimationId);
+            if(fallingElement) {
+                fallingElement.remove();
+                fallingElement = null;
+            }
+        }
+
+        function spawnWord() {
+            if(!dropGameActive) return;
+            if(dropLives <= 0) { gameOverDrop(); return; }
+
+            currentTargetWord = activeWords[Math.floor(Math.random() * activeWords.length)];
+            yPos = -40;
+            
+            const container = document.getElementById('drop-game-container');
+            container.innerHTML = '';
+            fallingElement = document.createElement('div');
+            fallingElement.className = 'falling-word rubik-font text-base md:text-xl px-4 py-1';
+            fallingElement.innerText = currentTargetWord.word;
+            if(currentTargetWord.category === 'אנגלית') fallingElement.dir = 'ltr';
+            container.appendChild(fallingElement);
+
+            setupDropButtons();
+            fallSpeed += 0.05;
+            animateFall();
+        }
+
+        function setupDropButtons() {
+            const buttons = document.getElementById('drop-options').querySelectorAll('button');
+            let options = [currentTargetWord.translation];
+            let otherWords = activeWords.filter(w => w.word !== currentTargetWord.word).sort(() => 0.5 - Math.random());
+            for(let i=0; i<3; i++) { if(otherWords[i]) options.push(otherWords[i].translation); }
+            options = options.sort(() => 0.5 - Math.random());
+
+            buttons.forEach((btn, index) => {
+                btn.innerText = options[index];
+                btn.className = 'btn-3d btn-white py-3 text-sm md:text-base';
+                
+                btn.onclick = () => {
+                    if(!dropGameActive) return;
+                    if(options[index] === currentTargetWord.translation) {
+                        btn.classList.add('btn-success'); btn.classList.remove('btn-white');
+                        createExplosion(fallingElement);
+                        dropScore += 10; updateDropUI();
+                        cancelAnimationFrame(fallAnimationId);
+                        fallingElement.style.display = 'none';
+                        setTimeout(spawnWord, 500);
+                    } else {
+                        btn.classList.add('btn-danger', 'shake-animation'); btn.classList.remove('btn-white');
+                        dropLives--; updateDropUI();
+                        setTimeout(() => {
+                            btn.classList.remove('btn-danger', 'shake-animation'); btn.classList.add('btn-white');
+                            if(dropLives <= 0) gameOverDrop();
+                        }, 500);
+                    }
+                };
+            });
+        }
+
+        function animateFall() {
+            if(!dropGameActive) return;
+            yPos += fallSpeed;
+            fallingElement.style.top = yPos + 'px';
+
+            const gameHeight = document.getElementById('game-area').offsetHeight;
+            if(yPos > gameHeight - 30) {
+                dropLives--; updateDropUI();
+                cancelAnimationFrame(fallAnimationId);
+                
+                const bg = document.getElementById('game-area');
+                bg.style.boxShadow = "inset 0 0 50px rgba(239, 68, 68, 0.8)";
+                setTimeout(() => bg.style.boxShadow = "inset 0 0 20px rgba(0,0,0,0.5)", 300);
+
+                if(dropLives > 0) setTimeout(spawnWord, 300);
+                else gameOverDrop();
+            } else {
+                fallAnimationId = requestAnimationFrame(animateFall);
+            }
+        }
+
+        function updateDropUI() {
+            document.getElementById('drop-score').innerText = dropScore;
+            let hearts = '';
+            for(let i=0; i<dropLives; i++) hearts += '<i class="fa-solid fa-heart"></i>';
+            for(let i=dropLives; i<3; i++) hearts += '<i class="fa-regular fa-heart"></i>';
+            document.getElementById('drop-lives').innerHTML = hearts;
+        }
+
+        function createExplosion(element) {
+            const container = document.getElementById('drop-game-container');
+            for(let i=0; i<10; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle bg-yellow-400';
+                const size = Math.random() * 8 + 4;
+                particle.style.width = size + 'px'; particle.style.height = size + 'px';
+                particle.style.left = (element.offsetLeft + element.offsetWidth/2) + 'px';
+                particle.style.top = element.offsetTop + 'px';
+                
+                const tx = (Math.random() - 0.5) * 100 + 'px';
+                const ty = (Math.random() - 0.5) * 100 + 'px';
+                particle.style.setProperty('--tx', tx); particle.style.setProperty('--ty', ty);
+                
+                container.appendChild(particle);
+                setTimeout(() => particle.remove(), 500);
+            }
+        }
+
+        function gameOverDrop() {
+            stopDropGame();
+            const screen = document.getElementById('drop-start-screen');
+            screen.classList.remove('hidden');
+            screen.innerHTML = `
+                <i class="fa-solid fa-skull text-4xl text-red-500 mb-3"></i>
+                <h3 class="text-2xl font-black text-white mb-2">נגמרו החיים!</h3>
+                <p class="text-slate-300 mb-4 font-bold text-lg">ניקוד: ${dropScore}</p>
+                <button onclick="startDropGame()" class="btn-3d btn-primary px-6 py-2 text-lg">שחקו שוב <i class="fa-solid fa-rotate-right ml-2"></i></button>
+            `;
+            document.getElementById('drop-options').querySelectorAll('button').forEach(b => {
+                b.classList.add('opacity-50', 'cursor-not-allowed'); b.disabled = true;
+            });
+        }
+
+        let matchCards = [];
+        let firstSelected = null, secondSelected = null;
+        let matchPairsFound = 0, timerInterval, secondsElapsed = 0, matchGameActive = false;
+
+        function initMatchGame() {
+            const grid = document.getElementById('match-grid');
+            grid.innerHTML = ''; matchCards = [];
+            
+            activeWords.forEach(item => {
+                matchCards.push({ id: item.word, text: item.word, type: 'word', lang: item.category });
+                matchCards.push({ id: item.word, text: item.translation, type: 'translation', lang: 'he' });
+            });
+
+            matchCards.sort(() => Math.random() - 0.5);
+
+            matchCards.forEach((cardData) => {
+                const cardEl = document.createElement('div');
+                cardEl.className = 'match-card rubik-font shadow-sm text-sm md:text-base';
+                cardEl.innerText = cardData.text; cardEl.dataset.id = cardData.id;
+                if(cardData.type === 'word' && cardData.lang === 'אנגלית') cardEl.dir = 'ltr';
+                
+                cardEl.onclick = () => handleCardClick(cardEl, cardData);
+                grid.appendChild(cardEl);
+            });
+            
+            document.getElementById('match-start-container').classList.remove('hidden');
+            grid.classList.add('opacity-50', 'pointer-events-none');
+            document.getElementById('match-timer').innerText = "00:00";
+        }
+
+        function restartMatchGame() {
+            clearInterval(timerInterval);
+            matchGameActive = false;
+            initMatchGame();
+            startMatchGame();
+            closeMatchModal();
+        }
+
+        function startMatchGame() {
+            if(matchGameActive) return;
+            matchGameActive = true; matchPairsFound = 0; secondsElapsed = 0;
+            updateTimerDisplay();
+            
+            document.getElementById('match-start-container').classList.add('hidden');
+            document.getElementById('match-grid').classList.remove('opacity-50', 'pointer-events-none');
+            firstSelected = null; secondSelected = null;
+
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => { secondsElapsed++; updateTimerDisplay(); }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const m = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+            const s = String(secondsElapsed % 60).padStart(2, '0');
+            document.getElementById('match-timer').innerText = `${m}:${s}`;
+        }
+
+        function handleCardClick(cardEl, cardData) {
+            if(!matchGameActive || cardEl.classList.contains('matched') || cardEl.classList.contains('selected') || (firstSelected && secondSelected)) return;
+
+            cardEl.classList.add('selected');
+            if (!firstSelected) firstSelected = { el: cardEl, data: cardData };
+            else { secondSelected = { el: cardEl, data: cardData }; checkMatch(); }
+        }
+
+        function checkMatch() {
+            if (firstSelected.data.id === secondSelected.data.id && firstSelected.data.type !== secondSelected.data.type) {
+                setTimeout(() => {
+                    firstSelected.el.classList.replace('selected', 'matched');
+                    secondSelected.el.classList.replace('selected', 'matched');
+                    firstSelected = null; secondSelected = null; matchPairsFound++;
+                    if (matchPairsFound === activeWords.length) {
+                        clearInterval(timerInterval); matchGameActive = false;
+                        setTimeout(() => {
+                            document.getElementById('final-time').innerText = document.getElementById('match-timer').innerText;
+                            document.getElementById('match-win-modal').classList.remove('hidden');
+                        }, 400);
+                    }
+                }, 300);
+            } else {
+                firstSelected.el.classList.add('error'); secondSelected.el.classList.add('error');
+                setTimeout(() => {
+                    firstSelected.el.classList.remove('selected', 'error');
+                    secondSelected.el.classList.remove('selected', 'error');
+                    firstSelected = null; secondSelected = null;
+                }, 600);
+            }
+        }
+
+        function closeMatchModal() {
+            document.getElementById('match-win-modal').classList.add('hidden');
+            if(matchPairsFound === activeWords.length) switchTab('quiz');
+        }
+
+        let currentQuizIndex = 0, quizScore = 0, quizQuestions = [];
+
+        function initQuiz() {
+            quizQuestions = [...activeWords].sort(() => Math.random() - 0.5);
+            currentQuizIndex = 0; quizScore = 0;
+            document.getElementById('quiz-content').classList.remove('hidden');
+            document.getElementById('quiz-results').classList.add('hidden');
+            loadQuizQuestion();
+        }
+
+        function loadQuizQuestion() {
+            const q = quizQuestions[currentQuizIndex];
+            document.getElementById('quiz-counter').innerText = `שאלה ${currentQuizIndex + 1} מתוך ${quizQuestions.length}`;
+            document.getElementById('quiz-question').innerHTML = `מה הפירוש של "<span class="text-indigo-600 ${q.category === 'אנגלית' ? 'font-sans' : ''}" dir="${q.category === 'אנגלית' ? 'ltr' : 'rtl'}">${q.word}</span>"?`;
+
+            const progress = ((currentQuizIndex) / quizQuestions.length) * 100;
+            document.getElementById('quiz-progress').style.width = `${progress}%`;
+
+            const optionsContainer = document.getElementById('quiz-options');
+            optionsContainer.innerHTML = '';
+            
+            let options = [...q.options].sort(() => Math.random() - 0.5);
+            options.forEach((opt) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn-3d btn-white w-full py-3 md:py-5 px-5 md:px-6 text-right text-base md:text-xl md:font-bold text-slate-700 flex justify-between items-center transition-transform hover:scale-[1.02]';
+                btn.innerText = opt;
+                btn.dataset.isCorrect = (opt === q.translation) ? "true" : "false";
+                btn.onclick = () => handleQuizAnswer(btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function handleQuizAnswer(clickedBtn) {
+            const buttons = document.getElementById('quiz-options').children;
+            const isCorrect = clickedBtn.dataset.isCorrect === "true";
+
+            for(let btn of buttons) {
+                btn.disabled = true; btn.classList.add('cursor-not-allowed');
+                if(btn.dataset.isCorrect === "true") {
+                    btn.classList.remove('btn-white'); btn.classList.add('btn-success');
+                    btn.innerHTML += ' <i class="fa-solid fa-check text-white text-lg"></i>';
+                }
+            }
+
+            if (isCorrect) { quizScore++; clickedBtn.classList.add('scale-[1.02]'); }
+            else {
+                clickedBtn.classList.remove('btn-white'); clickedBtn.classList.add('btn-danger', 'shake-animation');
+                clickedBtn.innerHTML += ' <i class="fa-solid fa-xmark text-white text-lg"></i>';
+            }
+
+            setTimeout(() => {
+                currentQuizIndex++;
+                if (currentQuizIndex < quizQuestions.length) loadQuizQuestion();
+                else showQuizResults();
+            }, 1200);
+        }
+
+        function showQuizResults() {
+            document.getElementById('quiz-content').classList.add('hidden');
+            document.getElementById('quiz-results').classList.remove('hidden');
+            document.getElementById('quiz-progress').style.width = `100%`;
+
+            const percentage = Math.round((quizScore / quizQuestions.length) * 100);
+            document.getElementById('quiz-score').innerText = `${quizScore}/${quizQuestions.length}`;
+
+            let feedback = "", emoji = "";
+            if (percentage === 100) { feedback = "מושלם! פסיכו מי? אתה תותח! 🔥"; emoji = "🏆"; }
+            else if (percentage >= 70) { feedback = "כל הכבוד! עבודה טובה מאוד 👍"; emoji = "👏"; }
+            else { feedback = "לא נורא, שווה לחזור לכרטיסיות 💪"; emoji = "📚"; }
+            
+            document.getElementById('quiz-feedback').innerText = feedback;
+            document.getElementById('quiz-emoji').innerText = emoji;
+        }
+
+        function closeQuizResults() { document.getElementById('quiz-results').classList.add('hidden'); }
+        function resetQuiz() { initQuiz(); }
+        
+        function nextSetOrFinish() {
+            const selector = document.getElementById('set-selector');
+            if(currentSetIndex + 1 < vocabSets.length) {
+                selector.value = currentSetIndex + 1;
+                changeSet(selector.value);
+            } else {
+                // Return to first set smoothly instead of alert popups
+                document.getElementById('quiz-feedback').innerHTML = "<span class='text-emerald-600 font-bold'>סיימתם את כל המקבצים במערכת! 🎉<br>חוזרים להתחלה...</span>";
+                setTimeout(() => {
+                    selector.value = 0; changeSet(0);
+                }, 2000);
+            }
+        }
+    </script>
+</body>
+</html>
