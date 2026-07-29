@@ -20,6 +20,8 @@
             --success-shadow: #15803d;
             --danger: #ef4444;
             --danger-shadow: #b91c1c;
+            --teal: #14b8a6;
+            --teal-shadow: #0f766e;
             --bg-color: #f8fafc;
         }
 
@@ -35,7 +37,6 @@
         
         h1, h2, h3, h4, .rubik-font { font-family: 'Rubik', sans-serif; }
 
-        /* Custom Scrollbar for Desktop (makes it look good on PC) */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
@@ -59,8 +60,14 @@
         .btn-success:active, .btn-success.active-press { box-shadow: 0 0px 0 var(--success-shadow); }
         .btn-danger { background-color: var(--danger); color: white; box-shadow: 0 4px 0 var(--danger-shadow); }
         .btn-danger:active, .btn-danger.active-press { box-shadow: 0 0px 0 var(--danger-shadow); }
+        .btn-teal { background-color: var(--teal); color: white; box-shadow: 0 4px 0 var(--teal-shadow); }
+        .btn-teal:active, .btn-teal.active-press { box-shadow: 0 0px 0 var(--teal-shadow); }
         .btn-white { background-color: white; color: #334155; border: 2px solid #e2e8f0; box-shadow: 0 4px 0 #e2e8f0; }
         .btn-white:active, .btn-white.active-press { box-shadow: 0 0px 0 #e2e8f0; border-color: #e2e8f0; }
+
+        /* Speed selectors for Drop Game */
+        .speed-btn-active { background-color: var(--primary); color: white; box-shadow: 0 4px 0 var(--primary-shadow) !important; border-color: transparent !important; }
+        .speed-btn-inactive { background-color: #334155; color: #cbd5e1; box-shadow: 0 4px 0 #1e293b !important; border-color: transparent !important; }
 
         .perspective-1000 { perspective: 1000px; }
         .flashcard-container { width: 100%; max-width: 450px; margin: 0 auto; height: 100%; min-height: 350px;}
@@ -137,6 +144,9 @@
             </button>
             <button onclick="switchTab('match')" id="tab-btn-match" class="tab-btn whitespace-nowrap py-2.5 px-3 md:px-4 font-bold text-gray-400 hover:text-indigo-500 border-b-4 border-transparent transition-colors flex items-center gap-2 text-sm md:text-base">
                 <i class="fa-solid fa-puzzle-piece"></i> זוגות
+            </button>
+            <button onclick="switchTab('sentences')" id="tab-btn-sentences" class="tab-btn whitespace-nowrap py-2.5 px-3 md:px-4 font-bold text-gray-400 hover:text-indigo-500 border-b-4 border-transparent transition-colors flex items-center gap-2 text-sm md:text-base">
+                <i class="fa-solid fa-pen-clip"></i> השלמה
             </button>
             <button onclick="switchTab('quiz')" id="tab-btn-quiz" class="tab-btn whitespace-nowrap py-2.5 px-3 md:px-4 font-bold text-gray-400 hover:text-indigo-500 border-b-4 border-transparent transition-colors flex items-center gap-2 text-sm md:text-base">
                 <i class="fa-solid fa-list-check"></i> בוחן פתע
@@ -251,10 +261,20 @@
                 </div>
 
                 <div id="game-area" class="flex-1 w-full relative mb-3 min-h-[200px]">
-                    <div id="drop-start-screen" class="text-center z-20 absolute inset-0 bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center">
+                    <div id="drop-start-screen" class="text-center z-20 absolute inset-0 bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center p-4">
                         <i class="fa-solid fa-meteor text-4xl text-yellow-400 mb-3 animate-bounce"></i>
                         <h3 class="text-xl font-bold text-white mb-4">מוכנים?</h3>
-                        <button onclick="startDropGame()" class="btn-3d btn-primary px-6 py-2 text-lg">שחק <i class="fa-solid fa-play mr-2"></i></button>
+                        
+                        <div class="mb-6 w-full max-w-[280px]">
+                            <p class="text-slate-300 text-xs font-bold mb-2 uppercase tracking-wider text-center">בחר זמן לנפילה:</p>
+                            <div class="flex justify-center gap-2 bg-slate-800 p-1.5 rounded-xl border border-slate-700" id="drop-speed-selectors">
+                                <button onclick="setDropSpeed('slow', this)" class="drop-speed-btn flex-1 btn-3d speed-btn-inactive py-2 text-sm rounded-lg" data-speed="slow">איטי 🐢</button>
+                                <button onclick="setDropSpeed('normal', this)" class="drop-speed-btn flex-1 btn-3d speed-btn-active py-2 text-sm rounded-lg" data-speed="normal">רגיל 🚶</button>
+                                <button onclick="setDropSpeed('fast', this)" class="drop-speed-btn flex-1 btn-3d speed-btn-inactive py-2 text-sm rounded-lg" data-speed="fast">מהיר 🚀</button>
+                            </div>
+                        </div>
+
+                        <button onclick="startDropGame()" class="btn-3d btn-primary px-10 py-3 text-lg w-full max-w-[280px]">שחק <i class="fa-solid fa-play mr-2"></i></button>
                     </div>
                     <div id="drop-game-container" class="absolute inset-0 hidden"></div>
                 </div>
@@ -301,7 +321,48 @@
                     
                     <div class="flex flex-col gap-3">
                         <button onclick="restartMatchGame()" class="btn-3d btn-primary w-full py-3 text-base"><i class="fa-solid fa-rotate-right mr-2"></i> שחק שוב</button>
-                        <button onclick="closeMatchModal()" class="btn-3d btn-success w-full py-3 text-base">לבוחן <i class="fa-solid fa-arrow-left mr-2"></i></button>
+                        <button onclick="closeMatchModal()" class="btn-3d btn-success w-full py-3 text-base">להשלמה <i class="fa-solid fa-arrow-left mr-2"></i></button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-sentences" class="tab-content h-full overflow-y-auto pb-10">
+            <div class="max-w-2xl mx-auto w-full mt-2">
+                <div class="text-center mb-4">
+                    <h2 class="text-2xl font-black text-slate-800 mb-1 rubik-font">השלמת משפטים ✍️</h2>
+                    <p class="text-slate-500 text-sm">בחרו את המילה המתאימה ביותר להשלמת המשפט.</p>
+                </div>
+
+                <div id="sentences-container" class="bg-white rounded-3xl shadow-sm border-2 border-slate-100 p-5 relative overflow-hidden">
+                    <div class="w-full bg-slate-100 rounded-full h-2 mb-6 border border-slate-200">
+                        <div id="sentences-progress" class="bg-gradient-to-r from-teal-400 to-emerald-500 h-full rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
+                    </div>
+                    
+                    <div id="sentences-content">
+                        <div class="flex justify-between items-center mb-4">
+                            <span id="sentences-counter" class="text-xs font-bold text-teal-600 bg-teal-50 px-2 py-1 rounded-md"></span>
+                            <button onclick="resetSentences()" class="text-xs text-slate-500 hover:text-teal-600 font-bold bg-slate-50 px-2 py-1 rounded transition-colors"><i class="fa-solid fa-rotate-right"></i> התחל מחדש</button>
+                        </div>
+                        
+                        <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 mb-6 shadow-inner text-center">
+                            <h3 id="sentences-question" class="text-xl md:text-2xl font-bold text-slate-800 leading-relaxed rubik-font"></h3>
+                        </div>
+                        
+                        <div id="sentences-options" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <!-- Options injected by JS -->
+                        </div>
+                    </div>
+
+                    <div id="sentences-results" class="hidden text-center py-4">
+                        <div class="text-6xl mb-4" id="sentences-emoji">🎯</div>
+                        <h3 class="text-3xl font-black text-slate-800 mb-2 rubik-font">הציון שלך</h3>
+                        <div class="text-4xl font-black text-teal-600 mb-2" id="sentences-score"></div>
+                        <p class="text-slate-600 mb-6 text-sm font-medium" id="sentences-feedback"></p>
+                        <div class="flex flex-col gap-3 justify-center">
+                            <button onclick="switchTab('quiz')" class="btn-3d btn-teal px-5 py-3">לבוחן פתע <i class="fa-solid fa-arrow-left mr-2"></i></button>
+                            <button onclick="resetSentences()" class="btn-3d btn-white px-5 py-3 text-sm"><i class="fa-solid fa-rotate-right ml-2"></i> נסה שוב</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -362,6 +423,15 @@
                     { word: "אֶסְקַלַצְיָה", translation: "הסלמה, החרפה", category: "עברית", example: "חלה אסקלציה ביחסים.", realLife: "כשויכוח קטן הופך לאלימות.", options: ["הסלמה, החרפה", "רגיעה", "התנצלות", "הסכם"], analogy: { question: "אסקלציה : התמתנות", options: ["1. הידברות : שיחה", "2. התקררות : התחממות", "3. ריצה : תחרות", "4. כעס : זעם"], correct: 1, explanation: "התמתנות היא ההפך מאסקלציה, כשם שהתקררות היא ההפך מהתחממות." } },
                     { word: "לְהַג", translation: "דיבור סרק, קשקוש", category: "עברית", example: "נאומו היה כולו להג.", realLife: "כשמישהו חופר במוח.", options: ["חוכמה", "שתיקה", "דיבור סרק, קשקוש", "שירה"], analogy: { question: "להג : לפטפט", options: ["1. שיר : לזמר", "2. לחש : לצעוק", "3. בכי : לשמוח", "4. מזון : לאכול"], correct: 0, explanation: "להג הוא התוצר של לפטפט, כמו ששיר הוא התוצר של לזמר." } },
                     { word: "נִרְגָּן", translation: "רוטן, מתלונן תמיד", category: "עברית", example: "הזקן הנרגן העיר לכולם.", realLife: "דרדסבא נרגני!", options: ["שמח", "רוטן, מתלונן תמיד", "נדיב", "אמיץ"], analogy: { question: "נרגן : מתלונן", options: ["1. קמצן : תורם", "2. בדחן : מצחיק", "3. עצלן : עובד", "4. שתקן : מרצה"], correct: 1, explanation: "נרגן הוא אדם שמרבה להתלונן, כשם שבדחן מרבה להצחיק." } }
+                ],
+                sentences: [
+                    { question: "הלקוח ה_____ לא הפסיק לבוא בטענות על טיב השירות במסעדה.", options: ["נרגן", "רהוט", "תמים", "תמהוני"], correctAnswer: "נרגן" },
+                    { question: "In order to _____ the disease completely, a global vaccination effort is required.", options: ["Eradicate", "Mitigate", "Ponder", "Coerce"], correctAnswer: "Eradicate", dir: "ltr" },
+                    { question: "Smart devices have become so _____ that it's hard to find a home without them.", options: ["Ubiquitous", "Lethargic", "Benevolent", "Candid"], correctAnswer: "Ubiquitous", dir: "ltr" },
+                    { question: "The architect was known for his _____ attention to detail in every project.", options: ["Meticulous", "Banal", "Frugal", "Zealous"], correctAnswer: "Meticulous", dir: "ltr" },
+                    { question: "After the storm, the _____ community quickly began to rebuild their homes.", options: ["Resilient", "Opaque", "Ambiguous", "Malicious"], correctAnswer: "Resilient", dir: "ltr" },
+                    { question: "בעקבות התקרית בגבול, חלה _____ מסוכנת במתיחות בין שתי המדינות.", options: ["אסקלציה", "תכונה", "הדפה", "סגולה"], correctAnswer: "אסקלציה" },
+                    { question: "נאומו של הפוליטיקאי היה מלא ב_____ חסר משמעות שלא חידש דבר לקהל.", options: ["להג", "שאון", "קולמוס", "בוסר"], correctAnswer: "להג" }
                 ]
             },
             {
@@ -377,6 +447,15 @@
                     { word: "כִּילַי", translation: "קמצן, צייקן", category: "עברית", example: "העשיר הכילי סירב לתרום.", realLife: "מר קראב מבובספוג.", options: ["נדיב", "קמצן, צייקן", "לוחם", "חכם"], analogy: { question: "כילי : לתת", options: ["1. שתקן : לדבר", "2. רעב : לאכול", "3. עייף : לישון", "4. שקרן : לרמות"], correct: 0, explanation: "כילי נמנע מלתת, כשם ששתקן נמנע מלדבר." } },
                     { word: "שָׁאוֹן", translation: "רעש, המולה", category: "עברית", example: "שאון המכוניות בעיר.", realLife: "הפסקה בבית ספר יסודי.", options: ["שקט", "רעש, המולה", "שעון", "חושך"], analogy: { question: "שאון : דממה", options: ["1. אור : חושך", "2. צבע : מכחול", "3. מים : ים", "4. שמחה : צחוק"], correct: 0, explanation: "שאון הוא ההפך מדממה." } },
                     { word: "אֲבוּקָה", translation: "לפיד, משואה", category: "עברית", example: "נשאו אבוקות בלילה.", realLife: "בטקסי הדלקת משואות.", options: ["לפיד, משואה", "חרב", "סירה", "ספר"], analogy: { question: "אבוקה : להאיר", options: ["1. עט : לכתוב", "2. חלון : לפתוח", "3. כיסא : לשבת", "4. מזלג : צלחת"], correct: 0, explanation: "תפקיד האבוקה הוא להאיר." } }
+                ],
+                sentences: [
+                    { question: "הסטודנט נטה ל-_____ במקום ללמוד, ולכן נאלץ ללמוד כל הלילה לפני המבחן.", options: ["Procrastinate", "Venerate", "Decipher", "Fathom"], correctAnswer: "Procrastinate", dir: "ltr" },
+                    { question: "הזקן ה_____ לא הסכים לתת לילדים אפילו כדור גלידה קטן.", options: ["כילי", "נחשל", "בורגני", "גמלוני"], correctAnswer: "כילי" },
+                    { question: "The beauty of a rainbow is _____, often lasting only a few minutes before fading away.", options: ["Ephemeral", "Diligent", "Astute", "Ruthless"], correctAnswer: "Ephemeral", dir: "ltr" },
+                    { question: "The _____ millionaire donated half of his wealth to local charities.", options: ["Benevolent", "Belligerent", "Ominous", "Inevitable"], correctAnswer: "Benevolent", dir: "ltr" },
+                    { question: "The author's descriptions were so long and _____ that they detracted from the main plot.", options: ["Superfluous", "Eloquent", "Plausible", "Tentative"], correctAnswer: "Superfluous", dir: "ltr" },
+                    { question: "כשנכנסנו לשוק המרכזי, _____ הרוכלים והקונים החריש את אוזנינו לחלוטין.", options: ["שאון", "חלם", "דמי", "פסע"], correctAnswer: "שאון" },
+                    { question: "בלילות החשוכים ביער, השומרים נשאו _____ בוערת שהאירה את דרכם.", options: ["אבוקה", "מהמורה", "אצעדה", "מגל"], correctAnswer: "אבוקה" }
                 ]
             },
             {
@@ -391,6 +470,15 @@
                     { word: "נֶחְשָׁל", translation: "מפגר מאחור, חלש", category: "עברית", example: "מדינת עולם שלישי נחשבת למדינה נחשלת.", realLife: "מישהו שנשאר מאחור בטיול השנתי.", options: ["מוביל", "מפגר מאחור, חלש", "חכם", "עקשן"], analogy: { question: "נחשל : חלוץ", options: ["1. עני : אביון", "2. טיפש : חכם", "3. איטי : זוחל", "4. מהיר : אצן"], correct: 1, explanation: "נחשל הוא ההפך מחלוץ (מי שמוביל קדימה), כשם שטיפש הוא ההפך מחכם." } },
                     { word: "כְּסָיָה", translation: "כפפה", category: "עברית", example: "בחורף היא נוהגת ללבוש כסיות מול כותנה.", realLife: "כפפות ששמים בשלג.", options: ["כובע", "גרביים", "מעיל", "כפפה"], analogy: { question: "כסיה : כף יד", options: ["1. צעיף : צוואר", "2. משקפיים : עין", "3. חגורה : בטן", "4. נעל : ראש"], correct: 0, explanation: "כסיה נועדה לעטוף את כף היד, כשם שצעיף נועד לעטוף את הצוואר." } },
                     { word: "אֶצְעָדָה", translation: "צמיד", category: "עברית", example: "היא ענדה אצעדה מזהב על ידה.", realLife: "תכשיט פנדורה על היד.", options: ["שרשרת", "טבעת", "עגיל", "צמיד"], analogy: { question: "אצעדה : זרוע", options: ["1. טבעת : אצבע", "2. כתר : רגל", "3. כובע : פנים", "4. חולצה : כתף"], correct: 0, explanation: "אצעדה (צמיד) עונדים על הזרוע, כשם שטבעת עונדים על האצבע." } }
+                ],
+                sentences: [
+                    { question: "הפתרון למשבר הנוכחי דורש תוכנית _____, ולא הסתמכות על תיאוריות שבאוויר.", options: ["Pragmatic", "Eccentric", "Morbid", "Luminous"], correctAnswer: "Pragmatic", dir: "ltr" },
+                    { question: "היא קיבלה ליום הולדתה _____ מזהב טהור שהעניקה חן רב לזרועה.", options: ["אצעדה", "פרפראות", "אבן בוחן", "תעודת עניות"], correctAnswer: "אצעדה" },
+                    { question: "The sudden disappearance of the famous explorer remains an unsolved _____.", options: ["Enigma", "Epiphany", "Fallacy", "Serendipity"], correctAnswer: "Enigma", dir: "ltr" },
+                    { question: "The doctor prescribed strong painkillers to _____ the patient's suffering after the surgery.", options: ["Mitigate", "Quench", "Daunt", "Vindicate"], correctAnswer: "Mitigate", dir: "ltr" },
+                    { question: "After eating the heavy holiday meal, everyone felt too _____ to go for a walk.", options: ["Lethargic", "Jubilant", "Gregarious", "Diligent"], correctAnswer: "Lethargic", dir: "ltr" },
+                    { question: "למרות המאמצים, מערכת החינוך באזור נותרה _____ ומתקשה לספק תנאים ראויים לתלמידים.", options: ["נחשל", "ברוד", "קפוץ", "גמלוני"], correctAnswer: "נחשל" },
+                    { question: "בחורף הקר של אירופה, אף גברת מכובדת לא יצאה מהבית ללא _____ על כל יד.", options: ["כסיה", "אלומה", "ציקלון", "סגולה"], correctAnswer: "כסיה" }
                 ]
             },
             {
@@ -405,6 +493,15 @@
                     { word: "קֻלְמוֹס", translation: "עט, מכשיר כתיבה", category: "עברית", example: "הסופר טבל את קולמוסו בדיו.", realLife: "עט נובע מפעם או סתם עט פיילוט.", options: ["ספר", "עט, מכשיר כתיבה", "מחק", "דף"], analogy: { question: "קולמוס : דיו", options: ["1. תנור : אש", "2. מכחול : צבע", "3. מחשב : מקלדת", "4. רכב : גלגל"], correct: 1, explanation: "הקולמוס פועל באמצעות הדיו, כשם שהמכחול פועל באמצעות צבע." } },
                     { word: "מַכְמַנִּים", translation: "סודות, אוצרות", category: "עברית", example: "מכמני השפה העברית עמוקים מאוד.", realLife: "סודות שמורים היטב או אוצר אבוד.", options: ["סודות, אוצרות", "שקרים", "סיפורים", "מכשירים"], analogy: { question: "מכמנים : לגלות", options: ["1. חידה : לפתור", "2. כסף : לבזבז", "3. שיר : לשיר", "4. חלון : לסגור"], correct: 0, explanation: "לגלות זה לחשוף את המכמנים, כשם שלפתור זה לחשוף את החידה." } },
                     { word: "שְׁאַט נֶפֶשׁ", translation: "גועל, בוז", category: "עברית", example: "הוא התבונן במעשה בשאט נפש.", realLife: "הפרצוף שעושים כשמריחים חלב מקולקל.", options: ["שמחה רבה", "גועל, בוז", "אדישות", "הפתעה"], analogy: { question: "שאט נפש : נגעל", options: ["1. עליצות : שמח", "2. ייאוש : מקווה", "3. פחד : אמיץ", "4. עייפות : נח"], correct: 0, explanation: "שאט נפש היא התחושה של מי שנגעל, כשם שעליצות היא התחושה של מי ששמח." } }
+                ],
+                sentences: [
+                    { question: "הילד ה_____ סיים את כל המטלות שלו מיד כשחזר מבית הספר.", options: ["Diligent", "Inept", "Gullible", "Astute"], correctAnswer: "Diligent", dir: "ltr" },
+                    { question: "לשמע ההצעה המעליבה, הוא הסתובב והביט בי ב_____.", options: ["שאט נפש", "תכונה", "עגמת נפש", "חלם"], correctAnswer: "שאט נפש" },
+                    { question: "Because she grew up during a recession, she remained _____ with her spending throughout her life.", options: ["Frugal", "Blatant", "Novice", "Inept"], correctAnswer: "Frugal", dir: "ltr" },
+                    { question: "The speaker was so _____ that the audience was entirely moved by his words.", options: ["Eloquent", "Opaque", "Resonant", "Wary"], correctAnswer: "Eloquent", dir: "ltr" },
+                    { question: "I appreciate your _____ feedback, even if it was hard for me to hear the truth.", options: ["Candid", "Malicious", "Unanimous", "Ambiguous"], correctAnswer: "Candid", dir: "ltr" },
+                    { question: "הסופר טבל את ה_____ שלו בדיו והחל לכתוב את יצירת המופת על דף הקלף.", options: ["קולמוס", "מגל", "ציקלון", "מכמנים"], correctAnswer: "קולמוס" },
+                    { question: "הארכיאולוגים חפרו במשך חודשים ארוכים במטרה לגלות את _____ המקדש האבוד.", options: ["מכמנים", "פרפראות", "כסיות", "אבוקות"], correctAnswer: "מכמנים" }
                 ]
             },
             {
@@ -419,6 +516,15 @@
                     { word: "מַגָּל", translation: "כלי קציר", category: "עברית", example: "האיכר קצר את החיטה במגל.", realLife: "הסמל הקומוניסטי של הפטיש והמגל.", options: ["פטיש", "כלי קציר", "כלי רכב", "סיר"], analogy: { question: "מגל : קוצר", options: ["1. עט : כותב", "2. סכין : חותך", "3. מספריים : גוזרים", "4. כל התשובות נכונות"], correct: 3, explanation: "מגל הוא כלי שתפקידו לבצע פעולת קציר, בדומה לכל שאר הזוגות בהם יש כלי ופעולתו." } },
                     { word: "צִיקְלוֹן", translation: "תרמיל, שק", category: "עברית", example: "הנווד לקח את ציקלונו ויצא לדרך.", realLife: "תיק גב של מוצ'ילרים.", options: ["סערה", "תרמיל, שק", "מעיל", "כובע"], analogy: { question: "ציקלון : ציוד", options: ["1. ארנק : כסף", "2. חלון : אוויר", "3. שולחן : עץ", "4. בקבוק : זכוכית"], correct: 0, explanation: "הציקלון (תרמיל) משמש לאחסון ציוד, כשם שהארנק משמש לאחסון כסף." } },
                     { word: "אֲלוּמָה", translation: "צרור שיבולים, קרן אור", category: "עברית", example: "אלומת אור פילחה את החושך.", realLife: "הפנס של השומר בלילה שזורק קרן אור.", options: ["עץ", "צרור שיבולים, קרן אור", "כלי מים", "סלע"], analogy: { question: "אלומה : שיבולים", options: ["1. זר : פרחים", "2. עדר : זאבים", "3. יער : עצים", "4. כל התשובות נכונות"], correct: 3, explanation: "אלומה היא אוסף של שיבולים, כשם שזר הוא אוסף פרחים, יער של עצים וכו'." } }
+                ],
+                sentences: [
+                    { question: "כלי הנשק הישנים הפכו ל-_____ לחלוטין אל מול הטכנולוגיה החדשה.", options: ["Obsolete", "Belligerent", "Plausible", "Luminous"], correctAnswer: "Obsolete", dir: "ltr" },
+                    { question: "בשעת בוקר מוקדמת, האיכר הניף את ה_____ כדי לקצור את התבואה בשדה.", options: ["מגל", "ציקלון", "קולמוס", "לפיד"], correctAnswer: "מגל" },
+                    { question: "The _____ customer started shouting at the cashier for no apparent reason.", options: ["Belligerent", "Benevolent", "Impartial", "Gregarious"], correctAnswer: "Belligerent", dir: "ltr" },
+                    { question: "Finding my dream job while randomly chatting with a stranger on a train was pure _____.", options: ["Serendipity", "Apathy", "Nostalgia", "Enigma"], correctAnswer: "Serendipity", dir: "ltr" },
+                    { question: "While taking a shower, the scientist had an _____ that finally solved the mathematical problem.", options: ["Epiphany", "Fallacy", "Anomaly", "Acumen"], correctAnswer: "Epiphany", dir: "ltr" },
+                    { question: "הנווד העמיס את ה_____ הכבד על גבו והמשיך בדרכו הארוכה אל מעבר להרים.", options: ["ציקלון", "קולמוס", "מגל", "שאון"], correctAnswer: "ציקלון" },
+                    { question: "מבעד לסדק בתקרת המערה החשוכה, חדרה _____ דקה של אור שמש.", options: ["אלומה", "מהמורה", "תכונה", "כסיה"], correctAnswer: "אלומה" }
                 ]
             },
             {
@@ -433,6 +539,15 @@
                     { word: "דְּמִי", translation: "שקט, דממה", category: "עברית", example: "דמי הלילה הופרע על ידי צווחה.", realLife: "השקט המוחלט בשתיים בלילה.", options: ["שקט, דממה", "כסף", "דם", "רעש"], analogy: { question: "דמי : רעש", options: ["1. אור : חושך", "2. גבוה : נמוך", "3. כל התשובות נכונות", "4. חם : רותח"], correct: 2, explanation: "דמי (שקט) הוא ההפך מרעש, כל הזוגות (חוץ מ-4) הם הפכים." } },
                     { word: "תְּכוּנָה", translation: "הכנה, פעילות רבה", category: "עברית", example: "תכונה רבה הורגשה לפני בוא הנשיא.", realLife: "הלחץ והריצות במטבח שעה לפני שבת.", options: ["שקט", "הכנה, פעילות רבה", "עצלנות", "שינה"], analogy: { question: "תכונה : שקט", options: ["1. מהומה : דממה", "2. כעס : זעם", "3. יופי : כיעור", "4. לילה : חושך"], correct: 0, explanation: "תכונה (המולה/פעילות) מנוגדת לשקט, כשם שמהומה מנוגדת לדממה." } },
                     { word: "סְגֻלָּה", translation: "תכונה חיובית, יכולת", category: "עברית", example: "סבלנות היא סגולה חשובה.", realLife: "להיות אדם שיודע להקשיב זו סגולה.", options: ["חיסרון", "תכונה חיובית, יכולת", "צבע", "חולשה"], analogy: { question: "סגולה : פגם", options: ["1. יתרון : חיסרון", "2. טוב : רע", "3. יפה : מכוער", "4. כל התשובות נכונות"], correct: 3, explanation: "סגולה (תכונה טובה) היא ההפך מפגם, כל הזוגות מייצגים הפכים." } }
+                ],
+                sentences: [
+                    { question: "הפגישה ה-_____ נערכה במרתף חשוך והרחק מעיני הציבור.", options: ["Clandestine", "Resonant", "Ethereal", "Tentative"], correctAnswer: "Clandestine", dir: "ltr" },
+                    { question: "בלילה שרר _____ מוחלט ביער, אפילו צרצר לא נשמע.", options: ["דמי", "שאון", "להג", "אלטרואיזם"], correctAnswer: "דמי" },
+                    { question: "The sudden drop in temperature and the dark clouds were _____ signs of an approaching storm.", options: ["Ominous", "Luminous", "Lucid", "Plausible"], correctAnswer: "Ominous", dir: "ltr" },
+                    { question: "The dancer moved with such grace that she appeared almost _____ on the stage.", options: ["Ethereal", "Pragmatic", "Tedious", "Banal"], correctAnswer: "Ethereal", dir: "ltr" },
+                    { question: "Finding a penguin in the middle of the Sahara Desert would certainly be a biological _____.", options: ["Anomaly", "Empathy", "Hubris", "Serendipity"], correctAnswer: "Anomaly", dir: "ltr" },
+                    { question: "לקראת ביקורו של נשיא ארה\"ב, מורגשת _____ רבה והתרגשות בכל רחבי העיר.", options: ["תכונה", "אסקלציה", "הדפה", "צפידה"], correctAnswer: "תכונה" },
+                    { question: "היכולת להקשיב בסבלנות גם כשאחרים כועסים היא _____ שמעטים ניחנו בה.", options: ["סגולה", "אליה וקוץ בה", "אבן נגף", "מהמורה"], correctAnswer: "סגולה" }
                 ]
             },
             {
@@ -447,6 +562,15 @@
                     { word: "פַּרְפְּרָאוֹת", translation: "קינוחים, דברים קלילים", category: "עברית", example: "אחרי הארוחה הוגשו פרפראות.", realLife: "עוגת שוקולד בסוף ארוחה במסעדה.", options: ["בשרים", "קינוחים, דברים קלילים", "מרקים", "שתייה"], analogy: { question: "פרפראות : סעודה", options: ["1. סוף : התחלה", "2. אפילוג : ספר", "3. כריכה : דף", "4. מנה ראשונה : קינוח"], correct: 1, explanation: "פרפראות באות בסוף הסעודה, כשם שאפילוג בא בסוף הספר." } },
                     { word: "הֲדָפָה", translation: "הפצת ריח", category: "עברית", example: "הדפת הבושם הורגשה בחדר.", realLife: "כשמישהו שם חצי בקבוק בושם ונכנס למעלית.", options: ["סגירה", "הפצת ריח", "מכה", "ריצה"], analogy: { question: "הדפה : אף", options: ["1. קרינה : אוזן", "2. צבע : עין", "3. קול : שפתיים", "4. טעם : יד"], correct: 1, explanation: "הדפה (ריח) נקלטת בחוש הריח (אף), כשם שצבע נקלט בחוש הראייה (עין)." } },
                     { word: "כְּלִיל", translation: "לגמרי, לחלוטין", category: "עברית", example: "הוא צדק כליל בהערכתו.", realLife: "כשאומרים 'כליל השלמות' (מושלם לגמרי).", options: ["קצת", "לגמרי, לחלוטין", "כמעט", "בקושי"], analogy: { question: "כליל : מעט", options: ["1. בשפע : קמצוץ", "2. הכל : כמעט", "3. תמיד : לפעמים", "4. כל התשובות נכונות"], correct: 3, explanation: "כליל (לחלוטין/הכל) מנוגד ל'מעט', כל הזוגות מייצגים יחס של המון לעומת קצת." } }
+                ],
+                sentences: [
+                    { question: "הזמר בעל הקול ה-_____ מילא את האולם כולו בצלילים עמוקים.", options: ["Resonant", "Obscure", "Blatant", "Cursory"], correctAnswer: "Resonant", dir: "ltr" },
+                    { question: "לאחר הארוחה הדשנה, המלצר הגיש לשולחן _____ מתוקות וטעימות.", options: ["פרפראות", "אבוקות", "אלומות", "כסיות"], correctAnswer: "פרפראות" },
+                    { question: "The _____ dial of the watch made it easy to read the time in the pitch dark.", options: ["Luminous", "Obscure", "Opaque", "Ephemeral"], correctAnswer: "Luminous", dir: "ltr" },
+                    { question: "Being a highly _____ person, she thrived at large parties and hated being alone.", options: ["Gregarious", "Lethargic", "Eccentric", "Wary"], correctAnswer: "Gregarious", dir: "ltr" },
+                    { question: "Before accepting the job offer, he asked for a few days to _____ the major life decision.", options: ["Ponder", "Eradicate", "Mitigate", "Scrutinize"], correctAnswer: "Ponder", dir: "ltr" },
+                    { question: "_____ הריח החריף של הדלק מן המנוע עוררה מיד את חשדו של המוסכניק.", options: ["הדפה", "צפידה", "אסקלציה", "עגמת נפש"], correctAnswer: "הדפה" },
+                    { question: "לאחר השריפה הקשה שפרצה במפעל, המבנה הישן נהרס _____ ולא נותר ממנו דבר.", options: ["כליל", "פסע", "גרידא", "ברי"], correctAnswer: "כליל" }
                 ]
             },
             {
@@ -461,6 +585,15 @@
                     { word: "בָּרוּד", translation: "מנומר, בעל כתמים", category: "עברית", example: "הסוס הברוד דהר באחו.", realLife: "פרווה של כלב דלמטי.", options: ["חלק", "מנומר, בעל כתמים", "שחור", "לבן"], analogy: { question: "ברוד : כתם", options: ["1. משובץ : קו", "2. מפוספס : פס", "3. מתולתל : שערה", "4. כל התשובות נכונות"], correct: 3, explanation: "ברוד מאופיין על ידי כתמים, בדומה למפוספס על ידי פסים ומשובץ על ידי קווים." } },
                     { word: "גָּנַז", translation: "הסתיר, שמר בארכיון", category: "עברית", example: "הוא גנז את הרעיון מחוסר תקציב.", realLife: "פרויקט בעבודה שבוטל ונזרק למגירה.", options: ["פרסם", "הסתיר, שמר בארכיון", "קרא", "כתב"], analogy: { question: "גנז : פרסם", options: ["1. החביא : חשף", "2. שמר : זרק", "3. בכה : צחק", "4. כעס : נרגע"], correct: 0, explanation: "גנז (הסתיר/שמר בסוד) הוא ההפך מפרסם, כשם שהחביא הוא ההפך מחשף." } },
                     { word: "אֶבֶן בֹּחַן", translation: "קריטריון, אמת מידה", category: "עברית", example: "המבחן הזה מהווה אבן בוחן לידע.", realLife: "מבחן הפסיכומטרי מהווה קריטריון קבלה לאוניברסיטה.", options: ["קריטריון, אמת מידה", "אבן כבדה", "חומת מגן", "כלי נשק"], analogy: { question: "אבן בוחן : להעריך", options: ["1. מאזניים : לשקול", "2. שעון : למדוד", "3. סרגל : לשרטט", "4. כל התשובות נכונות"], correct: 3, explanation: "אבן בוחן משמשת כדי להעריך, כשם שמאזניים משמשים כדי לשקול וסרגל כדי לשרטט." } }
+                ],
+                sentences: [
+                    { question: "עורך הדין מצא סוף סוף את ההוכחה שתעזור ל-_____ את הלקוח שלו מכל אשמה.", options: ["Vindicate", "Deride", "Alleviate", "Hinder"], correctAnswer: "Vindicate", dir: "ltr" },
+                    { question: "המנהל החליט שאין תקציב מספיק, ולכן _____ את הפרויקט במגירה התחתונה.", options: ["גנז", "חרץ", "הסכין", "טמן"], correctAnswer: "גנז" },
+                    { question: "The _____ detective quickly noticed the subtle inconsistencies in the suspect's alibi.", options: ["Astute", "Inept", "Gullible", "Novice"], correctAnswer: "Astute", dir: "ltr" },
+                    { question: "It is cruel to _____ someone for their lack of knowledge instead of helping them learn.", options: ["Deride", "Venerate", "Coerce", "Validate"], correctAnswer: "Deride", dir: "ltr" },
+                    { question: "The soothing massage helped to _____ the severe tension and pain in her lower back.", options: ["Alleviate", "Hinder", "Daunt", "Quench"], correctAnswer: "Alleviate", dir: "ltr" },
+                    { question: "הכלב הדלמטי מוכר בכל העולם בזכות פרוותו ה_____, המקושטת בכתמים שחורים.", options: ["ברוד", "גמלוני", "נחשל", "נפסד"], correctAnswer: "ברוד" },
+                    { question: "היכולת לעבוד תחת לחץ זמן מהווה _____ קריטית לסינון המועמדים לתפקיד.", options: ["אבן בוחן", "משענת קנה רצוץ", "תעודת עניות", "אבן נגף"], correctAnswer: "אבן בוחן" }
                 ]
             },
             {
@@ -475,6 +608,15 @@
                     { word: "גַּמְלוֹנִי", translation: "גדול ומסורבל", category: "עברית", example: "הנער הגמלוני הפיל את הכוס.", realLife: "כלב דני ענק שמנסה לשבת על ספה קטנה.", options: ["קטן וזריז", "גדול ומסורבל", "חכם מאוד", "שקט"], analogy: { question: "גמלוני : חן", options: ["1. עשיר : כסף", "2. טיפש : חוכמה", "3. מהיר : קצב", "4. חלש : כוח"], correct: 1, explanation: "לאדם גמלוני (מסורבל) חסר חן, כשם שלאדם טיפש חסרה חוכמה." } },
                     { word: "מַהֲמוֹרָה", translation: "בור, מכשול", category: "עברית", example: "הרכב קפץ כשפגע במהמורה בכביש.", realLife: "הבורות האלה בכביש שתמיד הורסים את הצמיג.", options: ["הצלחה", "בור, מכשול", "כלי רכב", "הר גבוה"], analogy: { question: "מהמורה : דרך", options: ["1. ענן : שמיים", "2. שרטון : ים", "3. מדרכה : רחוב", "4. גלגל : מכונית"], correct: 1, explanation: "מהמורה היא מכשול בדרך, כשם ששרטון הוא מכשול בים." } },
                     { word: "בּוֹסֶר", translation: "לא בשל, טרם הושלם", category: "עברית", example: "הענבים עדיין בוסר.", realLife: "אבוקדו קשה כמו אבן שאי אפשר לחתוך.", options: ["לא בשל, טרם הושלם", "רקוב", "מתוק מאוד", "יבש"], analogy: { question: "בוסר : להבשיל", options: ["1. קפוא : להפשיר", "2. שבור : לתקן", "3. כל התשובות נכונות", "4. מלוכלך : לנקות"], correct: 2, explanation: "בוסר הוא דבר שצריך עדיין להבשיל, בדומה לכל שאר הזוגות שמתארים מצב שדורש תהליך השלמה או תיקון." } }
+                ],
+                sentences: [
+                    { question: "הסופה הלכה והתחזקה, והיה ____ שהדרכים ייחסמו בקרוב.", options: ["Inevitable", "Ambiguous", "Malicious", "Novice"], correctAnswer: "Inevitable", dir: "ltr" },
+                    { question: "העץ שקטפנו ממנו היה עדיין ____ ולכן הפירות היו חמוצים מאוד.", options: ["בוסר", "נפסד", "פלסתר", "תמים"], correctAnswer: "בוסר" },
+                    { question: "As a complete _____ in the kitchen, he even struggled to boil an egg properly.", options: ["Novice", "Acumen", "Hubris", "Apathy"], correctAnswer: "Novice", dir: "ltr" },
+                    { question: "The ending of the movie was intentionally _____, leaving the audience to debate what really happened.", options: ["Ambiguous", "Lucid", "Blatant", "Candid"], correctAnswer: "Ambiguous", dir: "ltr" },
+                    { question: "The hacker sent a _____ link designed to steal personal information from the users.", options: ["Malicious", "Benevolent", "Resilient", "Frugal"], correctAnswer: "Malicious", dir: "ltr" },
+                    { question: "הנער ה_____ והגבוה נתקל בטעות בשולחן הקטן והפיל את האגרטל היקר שניצב עליו.", options: ["גמלוני", "קפוץ", "ברוד", "נרגן"], correctAnswer: "גמלוני" },
+                    { question: "בזמן הנסיעה המהירה בדרך העפר, גלגל הרכב נכנס ל_____ עמוקה שגרמה נזק לשלדה.", options: ["מהמורה", "אלומה", "אבוקה", "אצעדה"], correctAnswer: "מהמורה" }
                 ]
             },
             {
@@ -489,6 +631,15 @@
                     { word: "הִסְכִּין", translation: "התרגל, השלים עם המצב", category: "עברית", example: "הוא הסכין עם תנאי העבודה הקשים.", realLife: "כשהתרגלת לקום ב-5 בבוקר כל יום.", options: ["התנגד", "התרגל, השלים עם המצב", "חתך", "נפגע"], analogy: { question: "הסכין : הרגל", options: ["1. שינן : ידע", "2. התאמן : כושר", "3. התרצה : הסכמה", "4. כל התשובות נכונות"], correct: 3, explanation: "הסכין (התרגל) הוא מי שקיבל הרגל, בדומה להתקיימות הפעולה והתוצר בשאר הזוגות." } },
                     { word: "קָפוּץ", translation: "סגור, מכווץ", category: "עברית", example: "הוא ישב באגרופים קפוצים.", realLife: "מישהו שקופץ אגרופים מרוב עצבים.", options: ["פתוח", "סגור, מכווץ", "שמח", "מהיר"], analogy: { question: "קפוץ : סגור", options: ["1. פעור : פתוח", "2. גבוה : נמוך", "3. כועס : שמח", "4. עשיר : עני"], correct: 0, explanation: "קפוץ פירושו סגור בחוזקה, כשם שפעור פירושו פתוח ברווחה." } },
                     { word: "צְפִידָה", translation: "נוקשות", category: "עברית", example: "הוא סבל מצפידת שרירים.", realLife: "כשקמים בבוקר עם צוואר תפוס שאי אפשר להזיז.", options: ["גמישות", "נוקשות", "רטיבות", "שמחה"], analogy: { question: "צפידה : נוקשה", options: ["1. אהבה : שונא", "2. רפיון : משוחרר", "3. חרדה : רגוע", "4. כעס : שמח"], correct: 1, explanation: "צפידה היא התכונה של מי שהוא נוקשה, כשם שרפיון היא התכונה של מי שהוא משוחרר." } }
+                ],
+                sentences: [
+                    { question: "העבודה במפעל האריזה הייתה _____ וחזרה על עצמה מדי יום באופן מתיש.", options: ["Tedious", "Lucid", "Jubilant", "Eccentric"], correctAnswer: "Tedious", dir: "ltr" },
+                    { question: "הפנים שלו היו במבט _____ ומתוח כשהוא שמע את הבשורות הרעות.", options: ["קפוץ", "ברוד", "נחשל", "גמלוני"], correctAnswer: "קפוץ" },
+                    { question: "In Greek mythology, mortals who defied the gods often faced their terrible _____.", options: ["Wrath", "Empathy", "Nostalgia", "Serendipity"], correctAnswer: "Wrath", dir: "ltr" },
+                    { question: "The author referenced an _____ 19th-century poem that almost no one had ever read.", options: ["Obscure", "Ubiquitous", "Eloquent", "Pragmatic"], correctAnswer: "Obscure", dir: "ltr" },
+                    { question: "The ticketing machine was broken, so the conductor had to manually _____ the passengers' tickets.", options: ["Validate", "Deride", "Eradicate", "Hinder"], correctAnswer: "Validate", dir: "ltr" },
+                    { question: "עם השנים, העובד המסור _____ עם תנאי ההעסקה הנוקשים והפסיק להתלונן עליהם לחלוטין.", options: ["הסכין", "גנז", "טמן ידו בצלחת", "חרץ את לשונו"], correctAnswer: "הסכין" },
+                    { question: "לאחר שישן בתנוחה לא נוחה, הוא קם בבוקר והרגיש _____ מוחלטת בשרירי הצוואר.", options: ["צפידה", "הדפה", "תכונה", "עגמת נפש"], correctAnswer: "צפידה" }
                 ]
             },
             {
@@ -503,6 +654,15 @@
                     { word: "חֲדַל אִישִׁים", translation: "אדם חסר ערך", category: "עברית", example: "הוא התגלה כחדל אישים שלא עומד במילתו.", realLife: "הבחור בפרויקט הקבוצתי שלא עושה כלום.", options: ["גיבור", "אדם חסר ערך", "חכם", "עשיר"], analogy: { question: "חדל אישים : להעריך", options: ["1. מרושע : לכעוס", "2. שקרן : להאמין", "3. יפה : לכער", "4. מהיר : לעכב"], correct: 1, explanation: "קשה להעריך חדל אישים, כשם שקשה להאמין לשקרן (תכונה המונעת פעולה מסוימת כלפיו)." } },
                     { word: "נִיחָא", translation: "מילא, לו יהי", category: "עברית", example: "ניחא שלא באת, אבל למה לא הודעת?", realLife: "הגרסה התנ\"כית של 'סבבה, שיהיה'.", options: ["אסור", "מילא, לו יהי", "חובה", "אולי"], analogy: { question: "ניחא : הסכמה", options: ["1. הלוואי : תקווה", "2. אללי : צער", "3. האח : שמחה", "4. כל התשובות נכונות"], correct: 3, explanation: "המילה 'ניחא' מביעה הסכמה (פשרה), בדיוק כפי שהמילים האחרות מביעות את הרגשות המוצמדים אליהן." } },
                     { word: "הִגִּיעַ לְפִרְקוֹ", translation: "התבגר, הגיע זמנו להינשא", category: "עברית", example: "הנער הגיע לפרקו והחל לעבוד.", realLife: "הדודות שאומרות 'נו, מתי חתונה?'.", options: ["נכשל", "התבגר, הגיע זמנו להינשא", "ברח", "חזר בתשובה"], analogy: { question: "הגיע לפרקו : בגרות", options: ["1. החכים : ידע", "2. העשיר : הון", "3. הבריא : בריאות", "4. כל התשובות נכונות"], correct: 3, explanation: "הגיע לפרקו משמעו שרכש בגרות, כשם שהחכים משמעו שרכש ידע." } }
+                ],
+                sentences: [
+                    { question: "הוא הפגין _____ מוחלטת לצרות של חבריו ולא הציע עזרה כלל.", options: ["Apathy", "Nostalgia", "Hubris", "Empathy"], correctAnswer: "Apathy", dir: "ltr" },
+                    { question: "_____ שעשית טעות ושכחת להודיע, אבל למה גם שיקרת לי על כך?", options: ["ניחא", "ברי", "פסע", "כליל"], correctAnswer: "ניחא" },
+                    { question: "The student's _____ disregard for the school rules eventually led to his suspension.", options: ["Blatant", "Clandestine", "Tentative", "Wary"], correctAnswer: "Blatant", dir: "ltr" },
+                    { question: "The sheer size of the mountain did not _____ the highly experienced climbers.", options: ["Daunt", "Quench", "Alleviate", "Ponder"], correctAnswer: "Daunt", dir: "ltr" },
+                    { question: "Because he was late, he only gave the long contract a _____ glance before signing it.", options: ["Cursory", "Meticulous", "Diligent", "Zealous"], correctAnswer: "Cursory", dir: "ltr" },
+                    { question: "המפקד תיאר את החייל שהפקיר את משמרתו כ_____ שאינו ראוי כלל ללבוש את מדי הצבא.", options: ["חדל אישים", "כילי", "נרגן", "חלם"], correctAnswer: "חדל אישים" },
+                    { question: "האב הגאה התרגש מאוד לראות את בנו, ש_____, ניצב לבסוף מתחת לחופה.", options: ["הגיע לפרקו", "רחץ בניקיון כפיו", "הסכין", "גנז"], correctAnswer: "הגיע לפרקו" }
                 ]
             },
             {
@@ -517,6 +677,15 @@
                     { word: "בָּרִי", translation: "ברור, ודאי", category: "עברית", example: "ברי לי שהוא דובר אמת.", realLife: "כשמישהו שואל אם תבוא וברור שכן: 'זה ברי!'.", options: ["ספק", "ברור, ודאי", "אולי", "שקר"], analogy: { question: "ברי : ספק", options: ["1. ודאי : התלבטות", "2. עשיר : כסף", "3. מהיר : קצב", "4. חכם : שכל"], correct: 0, explanation: "דבר שהוא 'ברי' (ברור) אינו מוטל בספק, כשם שדבר 'ודאי' מנוגד להתלבטות." } },
                     { word: "אַלְטְרוּאִיזְם", translation: "זולתנות, הקרבה למען אחרים", category: "עברית", example: "התרומה בעילום שם היא הפגנת אלטרואיזם.", realLife: "לתת את המטרייה שלך למישהו אחר בגשם ולהירטב בעצמך.", options: ["אנוכיות", "זולתנות, הקרבה למען אחרים", "כעס", "קמצנות"], analogy: { question: "אלטרואיזם : אנוכיות", options: ["1. שמחה : עצב", "2. אמת : שקר", "3. כל התשובות נכונות", "4. נדיבות : קמצנות"], correct: 2, explanation: "אלטרואיזם מנוגד לאנוכיות, כפי שכל הזוגות האחרים מייצגים הפכים." } },
                     { word: "נִפְסָד", translation: "פגום, פסול", category: "עברית", example: "הוא השתמש בטיעון נפסד.", realLife: "תירוץ גרוע שמורה לא מאמינה לו.", options: ["מושלם", "פגום, פסול", "יקר", "חדש"], analogy: { question: "נפסד : פסול", options: ["1. הרוס : שבור", "2. רטוב : לח", "3. מושלם : שלם", "4. כל התשובות נכונות"], correct: 3, explanation: "נפסד ופסול הן מילים נרדפות למשהו פגום, בדומה לכל שאר הזוגות הנרדפים." } }
+                ],
+                sentences: [
+                    { question: "שופט בבית המשפט חייב להיות _____ ולא לקחת צד, יהיה אשר יהיה.", options: ["Impartial", "Fallacy", "Ruthless", "Unanimous"], correctAnswer: "Impartial", dir: "ltr" },
+                    { question: "היה _____ וברור לכולם שהוא אינו דובר אמת, ולכן סירבו לחתום על ההסכם.", options: ["ברי", "נפסד", "קפוץ", "גמלוני"], correctAnswer: "ברי" },
+                    { question: "The _____ billionaire built a massive mansion with secret passages and hidden doors.", options: ["Eccentric", "Banal", "Pragmatic", "Inevitable"], correctAnswer: "Eccentric", dir: "ltr" },
+                    { question: "The popular idea that lightning never strikes the exact same place twice is a complete _____.", options: ["Fallacy", "Epiphany", "Enigma", "Anomaly"], correctAnswer: "Fallacy", dir: "ltr" },
+                    { question: "Wearing heavy boots will definitely _____ your ability to run fast in the upcoming race.", options: ["Hinder", "Mitigate", "Validate", "Vindicate"], correctAnswer: "Hinder", dir: "ltr" },
+                    { question: "התנדבותו רבת השנים למען ניצולי השואה נובעת מתחושת _____ טהורה, ללא כוונה לקבל תמורה.", options: ["אלטרואיזם", "להג", "שאט נפש", "שאון"], correctAnswer: "אלטרואיזם" },
+                    { question: "השופט דחה את העתירה בטענה שהיא מסתמכת על היגיון _____ לחלוטין וחסר בסיס משפטי.", options: ["נפסד", "ברוד", "קפוץ", "גמלוני"], correctAnswer: "נפסד" }
                 ]
             },
             {
@@ -531,6 +700,15 @@
                     { word: "חֶלֶם", translation: "טיפשות, איוולת", category: "עברית", example: "ההחלטה לבנות גשר מעל המדבר היא חלם.", realLife: "כמו בסיפורי 'חכמי חלם' - פתרונות טיפשיים לבעיות פשוטות.", options: ["חוכמה", "טיפשות, איוולת", "גבורה", "עושר"], analogy: { question: "חלם : חכם", options: ["1. איוולת : נבון", "2. שקר : כנה", "3. כיעור : יפה", "4. כל התשובות נכונות"], correct: 3, explanation: "חלם (טיפשות) הוא ההפך מהתכונה של מי שהוא חכם, וכך בשאר הזוגות." } },
                     { word: "פְּלַסְתֵּר", translation: "זיוף, רמאות", category: "עברית", example: "החוזה שעליו חתמו התברר ככתב פלסתר.", realLife: "מסמך מזויף שנועד להונות אנשים.", options: ["אמת", "זיוף, רמאות", "כלי רפואי", "ספר"], analogy: { question: "פלסתר : אותנטי", options: ["1. שקר : אמת", "2. זיוף : מקורי", "3. חיקוי : אמיתי", "4. כל התשובות נכונות"], correct: 3, explanation: "פלסתר הוא דבר מזויף, והוא מנוגד לדבר אותנטי, בדומה לכל שאר ההפכים." } },
                     { word: "קֶרֶן זָוִית", translation: "פינה נידחת", category: "עברית", example: "הוא ישב בקרן זווית ולא דיבר עם איש.", realLife: "ילד שיושב בפינה בחדר ומענישים אותו.", options: ["מרכז", "פינה נידחת", "רחוב ראשי", "גג"], analogy: { question: "קרן זווית : מרכז", options: ["1. שוליים : אמצע", "2. קצה : ליבה", "3. פריפריה : גוש דן", "4. כל התשובות נכונות"], correct: 3, explanation: "קרן זווית מתארת מיקום צדדי, והיא הפוכה מהמרכז, כמו שאר הזוגות." } }
+                ],
+                sentences: [
+                    { question: "לאחר שהבקיעו את גול הניצחון בשניות האחרונות, הקהל יצא לרחובות במצב רוח _____.", options: ["Jubilant", "Morbid", "Banal", "Opaque"], correctAnswer: "Jubilant", dir: "ltr" },
+                    { question: "כשהתגלה שהמסמך אינו מקורי, הבינו כולם שמדובר בכתב _____ וביטלו את העסקה.", options: ["פלסתר", "חלם", "דמי", "ציקלון"], correctAnswer: "פלסתר" },
+                    { question: "Even in her nineties, my grandmother's mind remained completely _____ and remarkably sharp.", options: ["Lucid", "Opaque", "Ambiguous", "Obscure"], correctAnswer: "Lucid", dir: "ltr" },
+                    { question: "The writer's _____ fascination with death and decay was deeply evident in all of his horror novels.", options: ["Morbid", "Jubilant", "Resonant", "Ethereal"], correctAnswer: "Morbid", dir: "ltr" },
+                    { question: "Looking through the old family photo album filled her with a deep sense of _____ for her childhood.", options: ["Nostalgia", "Apathy", "Wrath", "Empathy"], correctAnswer: "Nostalgia", dir: "ltr" },
+                    { question: "ההחלטה לרצף את הכביש רגע לפני שמתקנים את צינורות הביוב שמתחתיו היא מעשה _____ של ממש.", options: ["חלם", "מכמנים", "פרפראות", "להג"], correctAnswer: "חלם" },
+                    { question: "לאחר התקרית, השחקן הוותיק נדחק ל_____ ולא קיבל אף תפקיד משמעותי בשנים האחרונות.", options: ["קרן זווית", "משענת קנה רצוץ", "אבן נגף", "אליה וקוץ בה"], correctAnswer: "קרן זווית" }
                 ]
             },
             {
@@ -545,6 +723,15 @@
                     { word: "גְּרֵידָא", translation: "בלבד, ותו לא", category: "עברית", example: "זוהי הערכה גרידא, לא עובדה.", realLife: "כשאומרים 'זה שקר גרידא!' כלומר - רק שקר ושום דבר אחר.", options: ["לגמרי", "בלבד, ותו לא", "אולי", "בכלל"], analogy: { question: "גרידא : בלבד", options: ["1. אכן : באמת", "2. תדיר : תמיד", "3. כל התשובות נכונות", "4. חיש : מהר"], correct: 3, explanation: "גרידא ובלבד הן מילים נרדפות, וכך גם בשאר אפשרויות התשובה." } },
                     { word: "תְּעוּדַת עֲנִיּוּת", translation: "עדות לחוסר יכולת או עליבות", category: "עברית", example: "המצב ברחובות הוא תעודת עניות לעירייה.", realLife: "כשהמורה אומרת שהציונים במבחן הם תעודת עניות לכיתה.", options: ["הישג", "עדות לחוסר יכולת או עליבות", "תעודת הצטיינות", "כסף"], analogy: { question: "תעודת עניות : כישלון", options: ["1. תעודת הוקרה : הצלחה", "2. צל\"ש : גבורה", "3. אות קלון : חרפה", "4. כל התשובות נכונות"], correct: 3, explanation: "תעודת עניות מעידה על כישלון/חולשה, בדומה לקשר בין שאר התעודות/אותות והמשמעות שלהן." } },
                     { word: "אֶבֶן נֶגֶף", translation: "מכשול, תקלה", category: "עברית", example: "התקציב היה אבן נגף בדרך לפרויקט.", realLife: "בעיה שמונעת ממך להתקדם, כמו מבחן במתמטיקה שחוסם לך את התואר.", options: ["מדרגה", "מכשול, תקלה", "אבן יקרה", "כלי נשק"], analogy: { question: "אבן נגף : להפריע", options: ["1. מגדלור : להכווין", "2. בלם : לעצור", "3. מנוע : לדחוף", "4. כל התשובות נכונות"], correct: 3, explanation: "תפקידה של אבן נגף הוא להפריע, כשם שכל שאר העצמים משמשים לפעולה המוצמדת להם." } }
+                ],
+                sentences: [
+                    { question: "ההסבר שהוא סיפק לאיחור נשמע _____, ולכן המורה החליטה לוותר לו הפעם.", options: ["Plausible", "Opaque", "Gullible", "Inept"], correctAnswer: "Plausible", dir: "ltr" },
+                    { question: "חוסר היכולת של העירייה לטפל בבעיית הניקיון הוא _____ של ממש לחזון ראש העיר.", options: ["תעודת עניות", "אבן נגף", "אבן בוחן", "משענת קנה רצוץ"], correctAnswer: "תעודת עניות" },
+                    { question: "The bathroom window is made of _____ glass to ensure absolute privacy for anyone inside.", options: ["Opaque", "Luminous", "Lucid", "Blatant"], correctAnswer: "Opaque", dir: "ltr" },
+                    { question: "The _____ warlord showed absolutely no mercy to the innocent villagers who opposed his reign.", options: ["Ruthless", "Benevolent", "Impartial", "Gregarious"], correctAnswer: "Ruthless", dir: "ltr" },
+                    { question: "After hiking in the hot desert for hours, nothing could _____ his thirst better than cold water.", options: ["Quench", "Daunt", "Coerce", "Deride"], correctAnswer: "Quench", dir: "ltr" },
+                    { question: "הדיון בפרלמנט הפך למופע פופוליסטי _____, שנועד אך ורק למשוך את תשומת לב התקשורת.", options: ["גרידא", "ברי", "ניחא", "כליל"], correctAnswer: "גרידא" },
+                    { question: "החוסר בתקציב מתאים היווה _____ משמעותית בדרך להשלמת הפרויקט במועדו.", options: ["אבן נגף", "אבן בוחן", "תעודת עניות", "סגולה"], correctAnswer: "אבן נגף" }
                 ]
             },
             {
@@ -559,6 +746,15 @@
                     { word: "דָּא עָקָא", translation: "הצרה היא, הרע בדבר", category: "עברית", example: "הדירה יפה, דא עקא שהיא רחוקה מהמרכז.", realLife: "המקבילה הגבוהה ל-'אבל הבעיה היא ש...'.", options: ["למרבה המזל", "הצרה היא, הרע בדבר", "פתאום", "לכן"], analogy: { question: "דא עקא : בעיה", options: ["1. אשרי : התלהבות", "2. הללויה : הודיה", "3. אבוי : צער", "4. כל התשובות נכונות"], correct: 3, explanation: "המילה 'דא עקא' משמשת להצגת בעיה, כפי שהמילים האחרות משמשות להצגת הרגשות המוצמדים להן." } },
                     { word: "חָרַץ אֶת לְשׁוֹנוֹ", translation: "התחצף, דיבר בעזות מצח", category: "עברית", example: "הנער חרץ את לשונו כלפי המורה.", realLife: "תלמיד שעונה למורה בחזרה בחוצפה.", options: ["שתק", "התחצף, דיבר בעזות מצח", "בכה", "אכל"], analogy: { question: "חרץ את לשונו : דיבור", options: ["1. קפץ את ידו : נתינה", "2. כרה אוזן : שמיעה", "3. הרים גבה : פליאה", "4. כל התשובות נכונות"], correct: 3, explanation: "חרץ לשונו זה ביטוי שקשור לדיבור (חוצפה), כמו שכרה אוזן קשור להקשבה/שמיעה." } },
                     { word: "מִשְׁעֶנֶת קָנֶה רָצוּץ", translation: "אדם או דבר שלא ניתן לסמוך עליו", category: "עברית", example: "אל תסמוך עליו, הוא משענת קנה רצוץ.", realLife: "חבר שתמיד מבטיח לעזור במעבר דירה ובסוף מבריז.", options: ["חבר נאמן", "אדם או דבר שלא ניתן לסמוך עליו", "מקל הליכה", "כיסא שבור"], analogy: { question: "משענת קנה רצוץ : לסמוך", options: ["1. סוד גלוי : להסתיר", "2. כוס נקובה : לאגור", "3. אבן שאין לה הופכין : להשתמש", "4. כל התשובות נכונות"], correct: 3, explanation: "אי אפשר לסמוך על משענת קנה רצוץ, כשם שאי אפשר לאגור נוזל בכוס נקובה." } }
+                ],
+                sentences: [
+                    { question: "ההחלטה התקבלה בוועדה באופן _____, ללא אף מתנגד או נמנע בחדר.", options: ["Unanimous", "Tentative", "Cursory", "Blatant"], correctAnswer: "Unanimous", dir: "ltr" },
+                    { question: "אל תסמוך עליו בעסקים מורכבים, הוא _____ שיאכזב אותך ברגע האמת.", options: ["משענת קנה רצוץ", "חדל אישים", "אליה וקוץ בה", "קב ונקי"], correctAnswer: "משענת קנה רצוץ" },
+                    { question: "The strict auditors will carefully _____ every single financial record to ensure there is no fraud.", options: ["Scrutinize", "Ponder", "Fathom", "Decipher"], correctAnswer: "Scrutinize", dir: "ltr" },
+                    { question: "We have reached a _____ agreement for now, but it still needs to be formally approved by the board.", options: ["Tentative", "Inevitable", "Unanimous", "Plausible"], correctAnswer: "Tentative", dir: "ltr" },
+                    { question: "In many ancient cultures, people deeply _____ their ancestors and hold annual festivals in their honor.", options: ["Venerate", "Deride", "Coerce", "Hinder"], correctAnswer: "Venerate", dir: "ltr" },
+                    { question: "התוכנית שלנו נראית מצוינת על הנייר; _____, שאין לנו מספיק עובדים כדי להוציא אותה לפועל.", options: ["דא עקא", "ניחא", "ברי", "כליל"], correctAnswer: "דא עקא" },
+                    { question: "כאשר המורה דרש שקט מוחלט, התלמיד _____ וענה בחוצפה לעיני כל הכיתה הנדהמת.", options: ["חרץ את לשונו", "טמן ידו בצלחת", "הסכין", "רחץ בניקיון כפיו"], correctAnswer: "חרץ את לשונו" }
                 ]
             },
             {
@@ -573,6 +769,15 @@
                     { word: "אַלְיָה וְקוֹץ בָּהּ", translation: "דבר טוב שיש בו פגם", category: "עברית", example: "העבודה רווחית, אך אליה וקוץ בה - שעות ארוכות.", realLife: "לקבל אוטו מהעבודה, אבל לגלות שזה רכב ישן בלי מזגן.", options: ["דבר מושלם", "דבר טוב שיש בו פגם", "צמח קוצני", "סכנה גדולה"], analogy: { question: "אליה וקוץ בה : פגם", options: ["1. שושנה בין החוחים : יופי", "2. טלית שכולה תכלת : שלמות", "3. כל התשובות נכונות", "4. אור בקצה המנהרה : תקווה"], correct: 3, explanation: "אליה וקוץ בה מכילה פגם (למרות שהיא טובה בעיקרה), בדומה לשאר הביטויים המכילים את המהות המוצמדת להם." } },
                     { word: "בּוּרְגָּנִי", translation: "עירוני, בן המעמד הבינוני-גבוה", category: "עברית", example: "הם חיים חיים בורגניים בפרברים.", realLife: "משפחה עם בית פרטי, ג'יפ וכלב גולדן רטריבר.", options: ["כפרי", "עירוני, בן המעמד הבינוני-גבוה", "עני מרוד", "נווד"], analogy: { question: "בורגני : מעמד", options: ["1. עירוני : מגורים", "2. צמחוני : תזונה", "3. דתי : אמונה", "4. כל התשובות נכונות"], correct: 3, explanation: "המילה בורגני מתארת שייכות למעמד מסוים, בדומה לכל שאר המילים שמתארות שייכות לקטגוריה המוצמדת להן." } },
                     { word: "עָגְמַת נֶפֶשׁ", translation: "צער, כאב, יגון", category: "עברית", example: "הביטול ברגע האחרון גרם לו עגמת נפש.", realLife: "לקנות כרטיסים להופעה בחו\"ל ואז הטיסה מתבטלת.", options: ["שמחה רבה", "צער, כאב, יגון", "כעס", "פליאה"], analogy: { question: "עגמת נפש : לשמח", options: ["1. עייפות : להמריץ", "2. שעמום : לרתק", "3. פחד : להרגיע", "4. כל התשובות נכונות"], correct: 3, explanation: "כדי להפיג עגמת נפש יש לשמח, כשם שכדי להפיג עייפות יש להמריץ (פעולה שמבטלת את המצב)." } }
+                ],
+                sentences: [
+                    { question: "כדאי להיות _____ כשמקבלים הצעות ממקור לא מוכר שנשמעות טובות מכדי להיות אמיתיות.", options: ["Wary", "Zealous", "Astute", "Diligent"], correctAnswer: "Wary", dir: "ltr" },
+                    { question: "התפקיד החדש מגיע עם שכר גבוה ורכב צמוד, אך _____ - צריך לעבוד גם בסופי שבוע.", options: ["אליה וקוץ בה", "דא עקא", "תעודת עניות", "קרן זווית"], correctAnswer: "אליה וקוץ בה" },
+                    { question: "His sharp financial _____ allowed him to single-handedly build a successful company from scratch.", options: ["Acumen", "Hubris", "Novice", "Apathy"], correctAnswer: "Acumen", dir: "ltr" },
+                    { question: "Immigrants living far away often _____ for the comforting food and traditions of their home country.", options: ["Yearn", "Quench", "Daunt", "Alleviate"], correctAnswer: "Yearn", dir: "ltr" },
+                    { question: "The _____ fans camped outside the stadium for three whole days just to get front-row tickets.", options: ["Zealous", "Lethargic", "Cursory", "Frugal"], correctAnswer: "Zealous", dir: "ltr" },
+                    { question: "למרות שניסה להציג את עצמו כאמן מורד, בפועל הוא חי חיים של אדם _____ ועמיד בפרברים.", options: ["בורגני", "כילי", "נחשל", "נפסד"], correctAnswer: "בורגני" },
+                    { question: "ביטול הטיסה ברגע האחרון, שעות ספורות לפני תחילת החופשה המתוכננת, גרם לכל המשפחה ל_____ רבה.", options: ["עגמת נפש", "צפידה", "הדפה", "אלטרואיזם"], correctAnswer: "עגמת נפש" }
                 ]
             },
             {
@@ -587,6 +792,15 @@
                     { word: "טָמַן יָדוֹ בַּצַּלַּחַת", translation: "ישב בחיבוק ידיים, התעצל", category: "עברית", example: "בזמן שכולם עבדו, הוא טמן ידו בצלחת.", realLife: "השותף לדירה שלא שוטף כלים בטענה ש'זה מתייבש לבד'.", options: ["עבד קשה", "ישב בחיבוק ידיים, התעצל", "אכל הרבה", "גנב כסף"], analogy: { question: "טמן ידו בצלחת : פעל", options: ["1. העלים עין : התייחס", "2. סכר את פיו : דיבר", "3. ישב בחיבוק ידיים : עשה", "4. כל התשובות נכונות"], correct: 3, explanation: "מי שטומן ידו בצלחת (מתעצל/לא מתערב) נמנע מלפעול, בדיוק כפי שהניבים האחרים מציגים הימנעות מהפעולה שמוצמדת להם." } },
                     { word: "לֵית מָאן דְּפָלִיג", translation: "אין חולק, כולם מסכימים", category: "עברית", example: "לית מאן דפליג שמדובר בתגלית חשובה.", realLife: "קונצנזוס. למשל: פלאפל זה טעים, לית מאן דפליג.", options: ["ויכוח גדול", "אין חולק, כולם מסכימים", "אולי", "אין סיכוי"], analogy: { question: "לית מאן דפליג : הסכמה", options: ["1. סלע המחלוקת : מריבה", "2. תמימות דעים : אחדות", "3. כל התשובות נכונות", "4. קונצנזוס : אחידות"], correct: 3, explanation: "לית מאן דפליג מצביע על מצב של הסכמה (אין מחלוקת), כפי שכל הזוגות מציגים מצב והמשמעות שלו." } },
                     { word: "פֶּסַע", translation: "צעד, מרחק קטן מאוד", category: "עברית", example: "היינו כפסע מהניצחון.", realLife: "כשאתה מפספס את האוטובוס בשנייה אחת.", options: ["מרחק עצום", "צעד, מרחק קטן מאוד", "זמן רב", "פסיעה רחבה"], analogy: { question: "פסע : מרחק", options: ["1. קורט : כמות", "2. הרף עין : זמן", "3. טיפה : נוזל", "4. כל התשובות נכונות"], correct: 3, explanation: "פסע הוא יחידה קטנה מאוד של מרחק, כשם שקורט הוא כמות קטנה והרף עין הוא זמן קצר." } }
+                ],
+                sentences: [
+                    { question: "הפושע ניסה ל-_____ את העד לשקר במהלך המשפט כדי שיצא זכאי.", options: ["Coerce", "Decipher", "Fathom", "Quench"], correctAnswer: "Coerce", dir: "ltr" },
+                    { question: "היינו כ-_____ מלהפסיד את הרכבת האחרונה, אך הגענו בדיוק ברגע שהדלתות נסגרו.", options: ["פסע", "אבן נגף", "מהמורה", "פלסתר"], correctAnswer: "פסע" },
+                    { question: "The brilliant spy used a special key to _____ the secret message intercepted from the enemy.", options: ["Decipher", "Scrutinize", "Vindicate", "Eradicate"], correctAnswer: "Decipher", dir: "ltr" },
+                    { question: "The romantic comedy was entirely _____, following the exact same predictable plot as every other movie.", options: ["Banal", "Eccentric", "Morbid", "Ethereal"], correctAnswer: "Banal", dir: "ltr" },
+                    { question: "A good therapist must possess deep _____ in order to truly understand their clients' ongoing struggles.", options: ["Empathy", "Wrath", "Hubris", "Fallacy"], correctAnswer: "Empathy", dir: "ltr" },
+                    { question: "בזמן שכל תושבי השכונה עמלו על ניקיון הגינה המשותפת, הוא _____ וישב להסתכל עליהם מהמרפסת.", options: ["טמן ידו בצלחת", "רחץ בניקיון כפיו", "חרץ את לשונו", "הסכין"], correctAnswer: "טמן ידו בצלחת" },
+                    { question: "בוויכוח הסוער הזה _____, וכולם בחדר מסכימים פה אחד שיש לשנות את החוק לאלתר.", options: ["לית מאן דפליג", "דא עקא", "אליה וקוץ בה", "משענת קנה רצוץ"], correctAnswer: "לית מאן דפליג" }
                 ]
             },
             {
@@ -601,6 +815,15 @@
                     { word: "קַב וְנָקִי", translation: "מעט אבל איכותי", category: "עברית", example: "הוא דיבר מעט, אבל דבריו היו קב ונקי.", realLife: "חנות בוטיק שיש בה 3 חולצות אבל כל אחת מושלמת.", options: ["הרבה ורע", "מעט אבל איכותי", "מלוכלך", "זול"], analogy: { question: "קב ונקי : איכות", options: ["1. זול וטוב : מחיר", "2. ארוך ומייגע : זמן", "3. מעט המכיל את המרובה : תמציתיות", "4. כל התשובות נכונות"], correct: 2, explanation: "משהו שהוא קב ונקי מצטיין באיכותו (למרות כמותו הקטנה), בדומה למעט המכיל את המרובה שמצטיין בתמציתיות." } },
                     { word: "רָחַץ בְּנִקְיוֹן כַּפָּיו", translation: "התנער מאחריות, טען לחפותו", category: "עברית", example: "לאחר המחדל, המנהל רחץ בניקיון כפיו.", realLife: "פוליטיקאי שמאשים את הש.ג בטעות שלו.", options: ["לקח אחריות", "התנער מאחריות, טען לחפותו", "שטף ידיים", "התנצל"], analogy: { question: "רחץ בניקיון כפיו : אשמה", options: ["1. חזר בו : דעה", "2. התפטר : משרה", "3. כל התשובות נכונות", "4. התכחש : קשר"], correct: 3, explanation: "מי שרוחץ בניקיון כפיו מסיר מעצמו את האשמה, בדומה לכל שאר הפעולות שנועדו להסיר או לנתק דבר מסוים." } },
                     { word: "תָּמִים", translation: "שלם, מושלם (גם: פותה)", category: "עברית", example: "עברנו שנה תמימה בלי לראות אותו.", realLife: "כשאומרים 'עמדתי שם שעה תמימה' (שעה שלמה מלאה).", options: ["חסר", "שלם, מושלם", "שקרן", "טיפש"], analogy: { question: "תמימים : שלם", options: ["1. שבורים : רסיס", "2. חסרים : חלק", "3. פגומים : כתם", "4. אין תשובה נכונה"], correct: 1, explanation: "התשובה פה מורכבת כי 'תמים' פירושו שלם, לכן המילים אינן קשורות ל'חסרים : חלק' אלא הפוכות לו, אך בקונטקסט האנלוגיה ניתן להבין שתמים = מכיל הכל, וחסר = חסר חלק." } }
+                ],
+                sentences: [
+                    { question: "רק אדם _____ וחמום מוח יאמין להבטחות הריקות של איש המכירות החלקלק הזה.", options: ["Gullible", "Inept", "Belligerent", "Benevolent"], correctAnswer: "Gullible", dir: "ltr" },
+                    { question: "המרצה אומנם דיבר רק מספר דקות, אך כל מילה שאמר הייתה בבחינת _____.", options: ["קב ונקי", "גרידא", "ברי", "ניחא"], correctAnswer: "קב ונקי" },
+                    { question: "The scale of the universe is so vast that it is almost impossible for the human mind to _____ it.", options: ["Fathom", "Ponder", "Scrutinize", "Venerate"], correctAnswer: "Fathom", dir: "ltr" },
+                    { question: "The general's blind _____ led him to believe he could conquer the frozen wasteland, resulting in total defeat.", options: ["Hubris", "Acumen", "Empathy", "Nostalgia"], correctAnswer: "Hubris", dir: "ltr" },
+                    { question: "The new employee was so completely _____ that he managed to crash the entire computer network on his first day.", options: ["Inept", "Astute", "Meticulous", "Diligent"], correctAnswer: "Inept", dir: "ltr" },
+                    { question: "למרות שהיה אחראי למחדל באופן ישיר, הפוליטיקאי _____ והפיל את מלוא האשמה על פקודיו הזוטרים.", options: ["רחץ בניקיון כפיו", "טמן ידו בצלחת", "הסכין", "גנז"], correctAnswer: "רחץ בניקיון כפיו" },
+                    { question: "נאלצנו להמתין שבוע _____ ומורט עצבים עד שהחבילה החשובה הגיעה לבסוף מסניף הדואר.", options: ["תמים", "נפסד", "נרגן", "גמלוני"], correctAnswer: "תמים" }
                 ]
             }
         ];
@@ -630,6 +853,7 @@
             switchTab('learn');
             closeMatchModal(); 
             closeQuizResults();
+            closeSentencesResults();
         }
 
         function loadSet(index) {
@@ -653,8 +877,9 @@
             matchGameActive = false;
             initMatchGame();
             
-            // Force quiz to re-initialize next time it's opened
+            // Reset Quiz and Sentences UI logic
             document.getElementById('quiz-options').innerHTML = ''; 
+            document.getElementById('sentences-options').innerHTML = '';
         }
 
         function switchTab(tabId) {
@@ -674,6 +899,9 @@
 
             if (tabId === 'quiz' && (document.getElementById('quiz-options').innerHTML === '' || !document.getElementById('quiz-results').classList.contains('hidden'))) {
                 initQuiz();
+            }
+            if (tabId === 'sentences' && (document.getElementById('sentences-options').innerHTML === '' || !document.getElementById('sentences-results').classList.contains('hidden'))) {
+                initSentences();
             }
         }
 
@@ -770,14 +998,30 @@
         let currentTargetWord = null;
         let fallAnimationId;
         let yPos = -50;
-        let fallSpeed = 1.0;
+        let fallSpeed = 0.8;
+        let currentDropSpeedType = 'normal';
+
+        function setDropSpeed(speed, btnElement) {
+            currentDropSpeedType = speed;
+            const buttons = document.querySelectorAll('.drop-speed-btn');
+            buttons.forEach(btn => {
+                btn.classList.remove('speed-btn-active');
+                btn.classList.add('speed-btn-inactive');
+            });
+            btnElement.classList.remove('speed-btn-inactive');
+            btnElement.classList.add('speed-btn-active');
+        }
 
         function startDropGame() {
-            stopDropGame(); // clear previous state if any
+            stopDropGame(); 
             dropGameActive = true;
             dropScore = 0;
             dropLives = 3;
-            fallSpeed = 0.8;
+            
+            if(currentDropSpeedType === 'slow') fallSpeed = 0.3;
+            else if(currentDropSpeedType === 'normal') fallSpeed = 0.8;
+            else if(currentDropSpeedType === 'fast') fallSpeed = 1.6;
+
             updateDropUI();
             
             document.getElementById('drop-start-screen').classList.add('hidden');
@@ -822,7 +1066,11 @@
             container.appendChild(fallingElement);
 
             setupDropButtons();
-            fallSpeed += 0.05;
+            
+            if(currentDropSpeedType === 'slow') fallSpeed += 0.01;
+            else if(currentDropSpeedType === 'normal') fallSpeed += 0.05;
+            else if(currentDropSpeedType === 'fast') fallSpeed += 0.1;
+            
             animateFall();
         }
 
@@ -910,12 +1158,11 @@
             stopDropGame();
             const screen = document.getElementById('drop-start-screen');
             screen.classList.remove('hidden');
-            screen.innerHTML = `
-                <i class="fa-solid fa-skull text-4xl text-red-500 mb-3"></i>
-                <h3 class="text-2xl font-black text-white mb-2">נגמרו החיים!</h3>
-                <p class="text-slate-300 mb-4 font-bold text-lg">ניקוד: ${dropScore}</p>
-                <button onclick="startDropGame()" class="btn-3d btn-primary px-6 py-2 text-lg">שחקו שוב <i class="fa-solid fa-rotate-right ml-2"></i></button>
-            `;
+            
+            // Keep the speed selector inside the start screen structure, just update text
+            screen.querySelector('h3').innerHTML = `נגמרו החיים! <br><span class="text-lg">ניקוד: ${dropScore}</span>`;
+            screen.querySelector('h3').classList.add('text-red-400');
+            
             document.getElementById('drop-options').querySelectorAll('button').forEach(b => {
                 b.classList.add('opacity-50', 'cursor-not-allowed'); b.disabled = true;
             });
@@ -1012,8 +1259,103 @@
 
         function closeMatchModal() {
             document.getElementById('match-win-modal').classList.add('hidden');
-            if(matchPairsFound === activeWords.length) switchTab('quiz');
+            if(matchPairsFound === activeWords.length) switchTab('sentences');
         }
+
+        let currentSentenceIndex = 0, sentenceScore = 0, sentenceQuestions = [];
+
+        function initSentences() {
+            const currentSetData = vocabSets[currentSetIndex];
+            if(!currentSetData.sentences || currentSetData.sentences.length === 0) {
+                // Failsafe empty state
+                document.getElementById('sentences-question').innerHTML = 'אין שאלות השלמה במקבץ זה.';
+                return;
+            }
+            sentenceQuestions = [...currentSetData.sentences].sort(() => Math.random() - 0.5);
+            currentSentenceIndex = 0; sentenceScore = 0;
+            document.getElementById('sentences-content').classList.remove('hidden');
+            document.getElementById('sentences-results').classList.add('hidden');
+            loadSentenceQuestion();
+        }
+
+        function loadSentenceQuestion() {
+            const q = sentenceQuestions[currentSentenceIndex];
+            document.getElementById('sentences-counter').innerText = `שאלה ${currentSentenceIndex + 1} מתוך ${sentenceQuestions.length}`;
+            
+            const qEl = document.getElementById('sentences-question');
+            qEl.innerHTML = q.question;
+            qEl.dir = q.dir === 'ltr' ? 'ltr' : 'rtl';
+            qEl.classList.toggle('font-sans', q.dir === 'ltr');
+
+            const progress = ((currentSentenceIndex) / sentenceQuestions.length) * 100;
+            document.getElementById('sentences-progress').style.width = `${progress}%`;
+
+            const optionsContainer = document.getElementById('sentences-options');
+            optionsContainer.innerHTML = '';
+            
+            let options = [...q.options].sort(() => Math.random() - 0.5);
+            options.forEach((opt) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn-3d btn-white w-full py-3 md:py-4 px-5 text-center text-base md:text-xl md:font-bold text-slate-700 transition-transform hover:scale-[1.02]';
+                btn.innerText = opt;
+                if(q.dir === 'ltr') btn.dir = 'ltr';
+                
+                btn.dataset.isCorrect = (opt === q.correctAnswer) ? "true" : "false";
+                btn.onclick = () => handleSentenceAnswer(btn, q);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function handleSentenceAnswer(clickedBtn, q) {
+            const buttons = document.getElementById('sentences-options').children;
+            const isCorrect = clickedBtn.dataset.isCorrect === "true";
+
+            for(let btn of buttons) {
+                btn.disabled = true; btn.classList.add('cursor-not-allowed');
+                if(btn.dataset.isCorrect === "true") {
+                    btn.classList.remove('btn-white'); btn.classList.add('btn-teal');
+                    btn.innerHTML = `<i class="fa-solid fa-check text-white mr-2"></i> ` + btn.innerHTML;
+                }
+            }
+
+            if (isCorrect) { sentenceScore++; clickedBtn.classList.add('scale-[1.02]'); }
+            else {
+                clickedBtn.classList.remove('btn-white'); clickedBtn.classList.add('btn-danger', 'shake-animation');
+                clickedBtn.innerHTML = `<i class="fa-solid fa-xmark text-white mr-2"></i> ` + clickedBtn.innerHTML;
+            }
+
+            // Reveal the blank in the question if it's correct
+            if(isCorrect) {
+                const qEl = document.getElementById('sentences-question');
+                qEl.innerHTML = q.question.replace(/_{2,}/, `<span class="text-teal-600 font-black border-b-2 border-teal-500">${q.correctAnswer}</span>`);
+            }
+
+            setTimeout(() => {
+                currentSentenceIndex++;
+                if (currentSentenceIndex < sentenceQuestions.length) loadSentenceQuestion();
+                else showSentencesResults();
+            }, 1800);
+        }
+
+        function showSentencesResults() {
+            document.getElementById('sentences-content').classList.add('hidden');
+            document.getElementById('sentences-results').classList.remove('hidden');
+            document.getElementById('sentences-progress').style.width = `100%`;
+
+            const percentage = Math.round((sentenceScore / sentenceQuestions.length) * 100);
+            document.getElementById('sentences-score').innerText = `${sentenceScore}/${sentenceQuestions.length}`;
+
+            let feedback = "", emoji = "";
+            if (percentage === 100) { feedback = "הבנה מושלמת של ההקשר! 🧠"; emoji = "🎯"; }
+            else if (percentage >= 50) { feedback = "כל הכבוד! עבודה טובה 👍"; emoji = "👏"; }
+            else { feedback = "שווה לקרוא את הסיפור בהקשר שוב 💪"; emoji = "📖"; }
+            
+            document.getElementById('sentences-feedback').innerText = feedback;
+            document.getElementById('sentences-emoji').innerText = emoji;
+        }
+
+        function closeSentencesResults() { document.getElementById('sentences-results').classList.add('hidden'); }
+        function resetSentences() { initSentences(); }
 
         let currentQuizIndex = 0, quizScore = 0, quizQuestions = [];
 
@@ -1098,7 +1440,6 @@
                 selector.value = currentSetIndex + 1;
                 changeSet(selector.value);
             } else {
-                // Return to first set smoothly instead of alert popups
                 document.getElementById('quiz-feedback').innerHTML = "<span class='text-emerald-600 font-bold'>סיימתם את כל המקבצים במערכת! 🎉<br>חוזרים להתחלה...</span>";
                 setTimeout(() => {
                     selector.value = 0; changeSet(0);
