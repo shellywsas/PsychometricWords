@@ -65,7 +65,6 @@
         .btn-white { background-color: white; color: #334155; border: 2px solid #e2e8f0; box-shadow: 0 4px 0 #e2e8f0; }
         .btn-white:active, .btn-white.active-press { box-shadow: 0 0px 0 #e2e8f0; border-color: #e2e8f0; }
 
-        /* Speed selectors for Drop Game */
         .speed-btn-active { background-color: var(--primary); color: white; box-shadow: 0 4px 0 var(--primary-shadow) !important; border-color: transparent !important; }
         .speed-btn-inactive { background-color: #334155; color: #cbd5e1; box-shadow: 0 4px 0 #1e293b !important; border-color: transparent !important; }
 
@@ -133,7 +132,10 @@
         </div>
 
         <nav class="max-w-5xl mx-auto px-2 flex overflow-x-auto border-t border-gray-100 hide-scrollbar-mobile">
-            <button onclick="switchTab('learn')" id="tab-btn-learn" class="tab-btn whitespace-nowrap py-2.5 px-3 md:px-4 font-bold text-indigo-600 border-b-4 border-indigo-600 flex items-center gap-2 transition-colors text-sm md:text-base">
+            <button onclick="switchTab('list')" id="tab-btn-list" class="tab-btn whitespace-nowrap py-2.5 px-3 md:px-4 font-bold text-indigo-600 border-b-4 border-indigo-600 flex items-center gap-2 transition-colors text-sm md:text-base">
+                <i class="fa-solid fa-list-ul"></i> רשימת מילים
+            </button>
+            <button onclick="switchTab('learn')" id="tab-btn-learn" class="tab-btn whitespace-nowrap py-2.5 px-3 md:px-4 font-bold text-gray-400 hover:text-indigo-500 border-b-4 border-transparent flex items-center gap-2 transition-colors text-sm md:text-base">
                 <i class="fa-solid fa-cards-blank"></i> כרטיסיות
             </button>
             <button onclick="switchTab('story')" id="tab-btn-story" class="tab-btn whitespace-nowrap py-2.5 px-3 md:px-4 font-bold text-gray-400 hover:text-indigo-500 border-b-4 border-transparent transition-colors flex items-center gap-2 text-sm md:text-base">
@@ -155,8 +157,23 @@
     </header>
 
     <main class="flex-1 w-full max-w-5xl mx-auto px-4 py-4 overflow-hidden relative">
+        
+        <!-- NEW TAB: Word List -->
+        <section id="tab-list" class="tab-content active h-full overflow-y-auto pb-10">
+            <div class="max-w-3xl mx-auto bg-white rounded-3xl shadow-sm border-2 border-slate-100 p-5 md:p-8 mt-2 relative overflow-hidden">
+                <div class="absolute -top-10 -right-10 text-8xl text-indigo-50 opacity-50"><i class="fa-solid fa-list-ul"></i></div>
+                <div class="text-center mb-6 relative z-10">
+                    <h2 class="text-2xl md:text-3xl font-black text-slate-800 mb-2 rubik-font">רשימת מילים מלאה 📋</h2>
+                    <p class="text-slate-500 text-sm">כל המילים של המקבץ הנוכחי מרוכזות במקום אחד לנוחותכם.</p>
+                </div>
+                <div id="word-list-container" class="space-y-3 relative z-10">
+                    <!-- Word list injected by JS -->
+                </div>
+            </div>
+        </section>
 
-        <section id="tab-learn" class="tab-content active h-full justify-between pb-4">
+        <!-- TAB: Learn (Flashcards) -->
+        <section id="tab-learn" class="tab-content h-full justify-between pb-4">
             <div class="text-center mb-4 flex-none">
                 <h2 class="text-2xl font-black text-slate-800 mb-1 rubik-font">זמן ללמוד! 🧠</h2>
                 <p class="text-slate-500 text-sm">לחצו על הכרטיסייה לתרגום ודוגמאות.</p>
@@ -312,7 +329,6 @@
                 </div>
             </div>
             
-            <!-- Match Game Win Modal -->
             <div id="match-win-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center">
                 <div class="bg-white rounded-3xl p-8 max-w-xs w-full text-center mx-4 shadow-2xl border-4 border-emerald-400">
                     <div class="text-5xl text-emerald-500 mb-3 animate-bounce"><i class="fa-solid fa-medal"></i></div>
@@ -352,6 +368,10 @@
                         <div id="sentences-options" class="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <!-- Options injected by JS -->
                         </div>
+                        
+                        <div id="sentences-next-container" class="hidden mt-6 text-center animate-fade-in">
+                            <button onclick="nextSentence()" class="btn-3d btn-teal px-8 py-2 md:py-3 text-base md:text-lg">שאלה הבאה <i class="fa-solid fa-arrow-left mr-2"></i></button>
+                        </div>
                     </div>
 
                     <div id="sentences-results" class="hidden text-center py-4">
@@ -389,6 +409,10 @@
                         
                         <div id="quiz-options" class="space-y-3">
                             <!-- Options injected by JS -->
+                        </div>
+
+                        <div id="quiz-next-container" class="hidden mt-6 text-center animate-fade-in">
+                            <button onclick="nextQuizQuestion()" class="btn-3d btn-primary px-8 py-2 md:py-3 text-base md:text-lg">שאלה הבאה <i class="fa-solid fa-arrow-left mr-2"></i></button>
                         </div>
                     </div>
 
@@ -491,7 +515,7 @@
                     { word: "Eloquent", translation: "רהוט, בעל כושר ביטוי", category: "אנגלית", example: "He gave an eloquent speech.", realLife: "פוליטיקאי שנואם בצורה מרשימה ללא גמגומים.", options: ["מגמגם", "שקט", "רהוט, בעל כושר ביטוי", "צועק"] },
                     { word: "Candid", translation: "כנה, ישיר", category: "אנגלית", example: "Please be candid with me.", realLife: "חבר שאומר לך בפרצוף שהחולצה לא מתאימה לך.", options: ["שקרן", "כנה, ישיר", "מהסס", "מתנצל"] },
                     { word: "קֻלְמוֹס", translation: "עט, מכשיר כתיבה", category: "עברית", example: "הסופר טבל את קולמוסו בדיו.", realLife: "עט נובע מפעם או סתם עט פיילוט.", options: ["ספר", "עט, מכשיר כתיבה", "מחק", "דף"], analogy: { question: "קולמוס : דיו", options: ["1. תנור : אש", "2. מכחול : צבע", "3. מחשב : מקלדת", "4. רכב : גלגל"], correct: 1, explanation: "הקולמוס פועל באמצעות הדיו, כשם שהמכחול פועל באמצעות צבע." } },
-                    { word: "מַכְמַנִּים", translation: "סודות, אוצרות", category: "עברית", example: "מכמני השפה העברית עמוקים מאוד.", realLife: "סודות שמורים היטב או אוצר אבוד.", options: ["סודות, אוצרות", "שקרים", "סיפורים", "מכשירים"], analogy: { question: "מכמנים : לגלות", options: ["1. חידה : לפתור", "2. כסף : לבזבז", "3. שיר : לשיר", "4. חלון : לסגור"], correct: 0, explanation: "לגלות זה לחשוף את המכמנים, כשם שלפתור זה לחשוף את החידה." } },
+                    { word: "מַכְמַנِّים", translation: "סודות, אוצרות", category: "עברית", example: "מכמני השפה העברית עמוקים מאוד.", realLife: "סודות שמורים היטב או אוצר אבוד.", options: ["סודות, אוצרות", "שקרים", "סיפורים", "מכשירים"], analogy: { question: "מכמנים : לגלות", options: ["1. חידה : לפתור", "2. כסף : לבזבז", "3. שיר : לשיר", "4. חלון : לסגור"], correct: 0, explanation: "לגלות זה לחשוף את המכמנים, כשם שלפתור זה לחשוף את החידה." } },
                     { word: "שְׁאַט נֶפֶשׁ", translation: "גועל, בוז", category: "עברית", example: "הוא התבונן במעשה בשאט נפש.", realLife: "הפרצוף שעושים כשמריחים חלב מקולקל.", options: ["שמחה רבה", "גועל, בוז", "אדישות", "הפתעה"], analogy: { question: "שאט נפש : נגעל", options: ["1. עליצות : שמח", "2. ייאוש : מקווה", "3. פחד : אמיץ", "4. עייפות : נח"], correct: 0, explanation: "שאט נפש היא התחושה של מי שנגעל, כשם שעליצות היא התחושה של מי ששמח." } }
                 ],
                 sentences: [
@@ -621,7 +645,7 @@
             },
             {
                 id: 10, name: "מקבץ 10: העובד המותש",
-                storyHTML: `העבודה הייתה כל כך <span class="word-highlight" dir="ltr" data-translation="מעייפת, משעממת">Tedious</span> שהמנהל התמלא ב-<span class="word-highlight" dir="ltr" data-translation="זעם, חרון אף">Wrath</span>. ההסברים למשימות היו לחלוטין <span class="word-highlight" dir="ltr" data-translation="מעורפלים">Obscure</span> ואף אחד לא טרח ל-<span class="word-highlight" dir="ltr" data-translation="לאשר, לתת תוקף">Validate</span> אותם.
+                storyHTML: `העבודה הייתה כל כך <span class="word-highlight" dir="ltr" data-translation="מעייפת, משעממת">Tedious</span> שההמנהל התמלא ב-<span class="word-highlight" dir="ltr" data-translation="זעם, חרון אף">Wrath</span>. ההסברים למשימות היו לחלוטין <span class="word-highlight" dir="ltr" data-translation="מעורפלים">Obscure</span> ואף אחד לא טרח ל-<span class="word-highlight" dir="ltr" data-translation="לאשר, לתת תוקף">Validate</span> אותם.
                 <br><br>הוא <span class="word-highlight" data-translation="התרגל, השלים עם המצב">הסכין</span> עם המצב. פניו הפכו למבט <span class="word-highlight" data-translation="סגור, מכווץ">קפוץ</span>, והוא הרגיש <span class="word-highlight" data-translation="נוקשות (כמו כיווץ שריר)">צפידה</span> בגבו מרוב לחץ.`,
                 words: [
                     { word: "Tedious", translation: "מעייף, משעמם", category: "אנגלית", example: "Filling out forms is a tedious task.", realLife: "למלא טפסי ביטוח לאומי.", options: ["מרתק", "מעייף, משעמם", "קצר", "מסוכן"] },
@@ -833,7 +857,8 @@
         
         window.onload = () => {
             initSetSelector();
-            loadSet(0);
+            // Load the first set and start on the word list tab
+            changeSet(0);
         };
 
         function initSetSelector() {
@@ -849,20 +874,15 @@
 
         function changeSet(index) {
             currentSetIndex = parseInt(index);
-            loadSet(currentSetIndex);
-            switchTab('learn');
-            closeMatchModal(); 
-            closeQuizResults();
-            closeSentencesResults();
-        }
-
-        function loadSet(index) {
-            activeWords = vocabSets[index].words;
+            activeWords = vocabSets[currentSetIndex].words;
+            
+            // Re-render components for the new set
+            renderWordList();
             
             currentCardIndex = 0;
             updateFlashcard();
             
-            document.getElementById('story-container').innerHTML = vocabSets[index].storyHTML;
+            document.getElementById('story-container').innerHTML = vocabSets[currentSetIndex].storyHTML;
             attachStoryHighlights();
             
             stopDropGame();
@@ -880,6 +900,30 @@
             // Reset Quiz and Sentences UI logic
             document.getElementById('quiz-options').innerHTML = ''; 
             document.getElementById('sentences-options').innerHTML = '';
+            
+            closeMatchModal(); 
+            closeQuizResults();
+            closeSentencesResults();
+            
+            switchTab('list'); // Default to list tab when switching sets
+        }
+
+        function renderWordList() {
+            const container = document.getElementById('word-list-container');
+            container.innerHTML = '';
+            activeWords.forEach(wordObj => {
+                const isEng = wordObj.category === 'אנגלית';
+                container.innerHTML += `
+                    <div class="flex flex-col md:flex-row md:items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 shadow-sm hover:border-indigo-200 transition-colors">
+                        <div class="font-black text-xl text-indigo-900 ${isEng ? 'font-sans tracking-wide' : 'rubik-font'}" dir="${isEng ? 'ltr' : 'rtl'}">
+                            ${wordObj.word}
+                        </div>
+                        <div class="text-slate-600 font-bold mt-1 md:mt-0 text-lg">
+                            ${wordObj.translation}
+                        </div>
+                    </div>
+                `;
+            });
         }
 
         function switchTab(tabId) {
@@ -931,10 +975,6 @@
 
             setTimeout(() => { if(tooltip.parentNode === el) el.removeChild(tooltip); }, 3000);
         }
-
-        document.addEventListener('click', () => {
-            document.querySelectorAll('.story-tooltip').forEach(t => t.remove());
-        });
 
         let currentCardIndex = 0;
         function updateFlashcard() {
@@ -991,15 +1031,9 @@
             }
         }
 
-        let dropGameActive = false;
-        let dropScore = 0;
-        let dropLives = 3;
-        let fallingElement = null;
-        let currentTargetWord = null;
-        let fallAnimationId;
-        let yPos = -50;
-        let fallSpeed = 0.8;
-        let currentDropSpeedType = 'normal';
+        let dropGameActive = false, dropScore = 0, dropLives = 3;
+        let fallingElement = null, currentTargetWord = null, fallAnimationId;
+        let yPos = -50, fallSpeed = 0.8, currentDropSpeedType = 'normal';
 
         function setDropSpeed(speed, btnElement) {
             currentDropSpeedType = speed;
@@ -1076,10 +1110,15 @@
 
         function setupDropButtons() {
             const buttons = document.getElementById('drop-options').querySelectorAll('button');
-            let options = [currentTargetWord.translation];
-            let otherWords = activeWords.filter(w => w.word !== currentTargetWord.word).sort(() => 0.5 - Math.random());
-            for(let i=0; i<3; i++) { if(otherWords[i]) options.push(otherWords[i].translation); }
-            options = options.sort(() => 0.5 - Math.random());
+            
+            // Gather all translations to prevent easy guessing
+            let allTranslations = [];
+            vocabSets.forEach(set => set.words.forEach(w => allTranslations.push(w.translation)));
+            allTranslations = [...new Set(allTranslations)].filter(t => t !== currentTargetWord.translation);
+            allTranslations.sort(() => Math.random() - 0.5);
+
+            let options = [currentTargetWord.translation, allTranslations[0], allTranslations[1], allTranslations[2]];
+            options = options.sort(() => Math.random() - 0.5);
 
             buttons.forEach((btn, index) => {
                 btn.innerText = options[index];
@@ -1158,8 +1197,6 @@
             stopDropGame();
             const screen = document.getElementById('drop-start-screen');
             screen.classList.remove('hidden');
-            
-            // Keep the speed selector inside the start screen structure, just update text
             screen.querySelector('h3').innerHTML = `נגמרו החיים! <br><span class="text-lg">ניקוד: ${dropScore}</span>`;
             screen.querySelector('h3').classList.add('text-red-400');
             
@@ -1168,8 +1205,7 @@
             });
         }
 
-        let matchCards = [];
-        let firstSelected = null, secondSelected = null;
+        let matchCards = [], firstSelected = null, secondSelected = null;
         let matchPairsFound = 0, timerInterval, secondsElapsed = 0, matchGameActive = false;
 
         function initMatchGame() {
@@ -1267,7 +1303,6 @@
         function initSentences() {
             const currentSetData = vocabSets[currentSetIndex];
             if(!currentSetData.sentences || currentSetData.sentences.length === 0) {
-                // Failsafe empty state
                 document.getElementById('sentences-question').innerHTML = 'אין שאלות השלמה במקבץ זה.';
                 return;
             }
@@ -1275,6 +1310,7 @@
             currentSentenceIndex = 0; sentenceScore = 0;
             document.getElementById('sentences-content').classList.remove('hidden');
             document.getElementById('sentences-results').classList.add('hidden');
+            document.getElementById('sentences-next-container').classList.add('hidden');
             loadSentenceQuestion();
         }
 
@@ -1290,23 +1326,64 @@
             const progress = ((currentSentenceIndex) / sentenceQuestions.length) * 100;
             document.getElementById('sentences-progress').style.width = `${progress}%`;
 
+            // פונקציה שמנקה ניקוד עברי כדי שנוכל להשוות מילים בצורה מדויקת ולא ניצור כפילויות
+            const removeNiqqud = (str) => str.replace(/[\u0591-\u05C7]/g, '');
+
+            // Dynamically build distractor options
+            const correctWordStr = q.correctAnswer;
+            const correctWordClean = removeNiqqud(correctWordStr);
+            const isEng = q.dir === 'ltr';
+            
+            let allMatchingWords = [];
+            let sameSetWords = [];
+            
+            vocabSets.forEach((set, idx) => {
+                set.words.forEach(w => {
+                    const wIsEng = w.category === 'אנגלית';
+                    const wWordClean = removeNiqqud(w.word);
+                    
+                    if (wIsEng === isEng && wWordClean !== correctWordClean) {
+                        allMatchingWords.push(wWordClean);
+                        if (idx === currentSetIndex) {
+                            sameSetWords.push(wWordClean);
+                        }
+                    }
+                });
+            });
+            
+            allMatchingWords = [...new Set(allMatchingWords)].sort(() => Math.random() - 0.5);
+            sameSetWords = [...new Set(sameSetWords)].sort(() => Math.random() - 0.5);
+            
+            let wrongOptions = [];
+            
+            // Prefer at least 2 wrong options from the SAME set (makes guessing harder)
+            while(wrongOptions.length < 2 && sameSetWords.length > 0) {
+                wrongOptions.push(sameSetWords.pop());
+            }
+            // Fill the remaining wrong options from all available words
+            while(wrongOptions.length < 3 && allMatchingWords.length > 0) {
+                const w = allMatchingWords.pop();
+                if(!wrongOptions.includes(w)) wrongOptions.push(w);
+            }
+            
+            let finalOptions = [correctWordClean, ...wrongOptions].sort(() => Math.random() - 0.5);
+
             const optionsContainer = document.getElementById('sentences-options');
             optionsContainer.innerHTML = '';
             
-            let options = [...q.options].sort(() => Math.random() - 0.5);
-            options.forEach((opt) => {
+            finalOptions.forEach((opt) => {
                 const btn = document.createElement('button');
                 btn.className = 'btn-3d btn-white w-full py-3 md:py-4 px-5 text-center text-base md:text-xl md:font-bold text-slate-700 transition-transform hover:scale-[1.02]';
                 btn.innerText = opt;
                 if(q.dir === 'ltr') btn.dir = 'ltr';
                 
-                btn.dataset.isCorrect = (opt === q.correctAnswer) ? "true" : "false";
-                btn.onclick = () => handleSentenceAnswer(btn, q);
+                btn.dataset.isCorrect = (opt === correctWordClean) ? "true" : "false";
+                btn.onclick = () => handleSentenceAnswer(btn, q, correctWordClean);
                 optionsContainer.appendChild(btn);
             });
         }
 
-        function handleSentenceAnswer(clickedBtn, q) {
+        function handleSentenceAnswer(clickedBtn, q, correctWordClean) {
             const buttons = document.getElementById('sentences-options').children;
             const isCorrect = clickedBtn.dataset.isCorrect === "true";
 
@@ -1327,14 +1404,20 @@
             // Reveal the blank in the question if it's correct
             if(isCorrect) {
                 const qEl = document.getElementById('sentences-question');
-                qEl.innerHTML = q.question.replace(/_{2,}/, `<span class="text-teal-600 font-black border-b-2 border-teal-500">${q.correctAnswer}</span>`);
+                qEl.innerHTML = q.question.replace(/_{2,}/, `<span class="text-teal-600 font-black border-b-2 border-teal-500 px-2">${correctWordClean}</span>`);
             }
 
-            setTimeout(() => {
-                currentSentenceIndex++;
-                if (currentSentenceIndex < sentenceQuestions.length) loadSentenceQuestion();
-                else showSentencesResults();
-            }, 1800);
+            document.getElementById('sentences-next-container').classList.remove('hidden');
+        }
+
+        function nextSentence() {
+            document.getElementById('sentences-next-container').classList.add('hidden');
+            currentSentenceIndex++;
+            if (currentSentenceIndex < sentenceQuestions.length) {
+                loadSentenceQuestion();
+            } else {
+                showSentencesResults();
+            }
         }
 
         function showSentencesResults() {
@@ -1364,6 +1447,7 @@
             currentQuizIndex = 0; quizScore = 0;
             document.getElementById('quiz-content').classList.remove('hidden');
             document.getElementById('quiz-results').classList.add('hidden');
+            document.getElementById('quiz-next-container').classList.add('hidden');
             loadQuizQuestion();
         }
 
@@ -1375,11 +1459,18 @@
             const progress = ((currentQuizIndex) / quizQuestions.length) * 100;
             document.getElementById('quiz-progress').style.width = `${progress}%`;
 
+            // Dynamically fetch other real translations from the DB to make guessing by length/commas impossible
+            let allTranslations = [];
+            vocabSets.forEach(set => set.words.forEach(w => allTranslations.push(w.translation)));
+            allTranslations = [...new Set(allTranslations)].filter(t => t !== q.translation);
+            allTranslations.sort(() => Math.random() - 0.5);
+
+            let finalOptions = [q.translation, allTranslations[0], allTranslations[1], allTranslations[2]].sort(() => Math.random() - 0.5);
+
             const optionsContainer = document.getElementById('quiz-options');
             optionsContainer.innerHTML = '';
             
-            let options = [...q.options].sort(() => Math.random() - 0.5);
-            options.forEach((opt) => {
+            finalOptions.forEach((opt) => {
                 const btn = document.createElement('button');
                 btn.className = 'btn-3d btn-white w-full py-3 md:py-5 px-5 md:px-6 text-right text-base md:text-xl md:font-bold text-slate-700 flex justify-between items-center transition-transform hover:scale-[1.02]';
                 btn.innerText = opt;
@@ -1407,11 +1498,14 @@
                 clickedBtn.innerHTML += ' <i class="fa-solid fa-xmark text-white text-lg"></i>';
             }
 
-            setTimeout(() => {
-                currentQuizIndex++;
-                if (currentQuizIndex < quizQuestions.length) loadQuizQuestion();
-                else showQuizResults();
-            }, 1200);
+            document.getElementById('quiz-next-container').classList.remove('hidden');
+        }
+
+        function nextQuizQuestion() {
+            document.getElementById('quiz-next-container').classList.add('hidden');
+            currentQuizIndex++;
+            if (currentQuizIndex < quizQuestions.length) loadQuizQuestion();
+            else showQuizResults();
         }
 
         function showQuizResults() {
